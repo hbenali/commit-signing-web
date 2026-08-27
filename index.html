@@ -217,6 +217,36 @@
     background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-dim);
   }
 
+  .badge-demo { display: flex; flex-direction: column; align-items: center; gap: .5rem; max-width: 400px; margin: 0 auto 2rem; }
+  .commit-row {
+    display: flex; align-items: center; gap: .6rem; width: 100%;
+    background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: .6rem .9rem; font-size: .85rem;
+  }
+  .commit-avatar {
+    width: 22px; height: 22px; border-radius: 999px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--accent), var(--link)); opacity: .5;
+  }
+  .commit-msg {
+    flex: 1; text-align: left; color: var(--text); font-weight: 500;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .commit-hash {
+    font-family: var(--font-mono); font-size: .76rem; color: var(--text-dim); flex-shrink: 0;
+    background: var(--bg-inset); border: 1px solid var(--border); border-radius: 5px; padding: .05rem .4rem;
+  }
+  .gh-badge {
+    display: inline-flex; align-items: center; gap: .25rem; flex-shrink: 0;
+    font-size: .72rem; font-weight: 600; padding: .1rem .5rem; border-radius: 999px; border: 1px solid;
+  }
+  .gh-badge svg { width: 12px; height: 12px; }
+  .gh-badge.unverified { background: var(--bg-inset); border-color: var(--border); color: var(--text-dim); }
+  .gh-badge.verified {
+    background: color-mix(in srgb, var(--accent) 15%, transparent);
+    border-color: color-mix(in srgb, var(--accent) 40%, transparent); color: var(--accent);
+  }
+  .badge-demo-arrow { font-size: .78rem; color: var(--text-dim); font-weight: 600; }
+
   .tabbar { display: inline-flex; gap: .25rem; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; padding: 3px; margin-bottom: .9rem; }
   .tabbar label {
     padding: .4rem .9rem; border-radius: 8px; font-size: .85rem; font-weight: 600; cursor: pointer;
@@ -407,6 +437,22 @@
     </div>
     <h1>Sign every commit.<br>No more "Unverified" badges.</h1>
     <p class="lead">One script sets up SSH commit signing end to end — detects the GitHub CLI, offers to migrate you off GPG, generates a key dedicated only to signing, uploads it to GitHub, and proves it works with a real signed test commit before it's done.</p>
+
+    <div class="badge-demo" aria-hidden="true">
+      <div class="commit-row">
+        <span class="commit-avatar"></span>
+        <span class="commit-msg">Fix login bug</span>
+        <span class="gh-badge unverified"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14Zm0 1.5a8.5 8.5 0 1 1 0-17 8.5 8.5 0 0 1 0 17ZM6.92 6.085h.001a.75.75 0 0 1 .154-.845l.008-.008a1.107 1.107 0 0 1 1.416-.007c.406.339.406.94 0 1.279l-.706.588a1.75 1.75 0 0 0-.625 1.333v.128a.75.75 0 0 0 1.5 0v-.078a.25.25 0 0 1 .09-.192l.706-.588c1.011-.844 1.011-2.518 0-3.362a2.607 2.607 0 0 0-3.334.017 2.25 2.25 0 0 0-.464 2.536.75.75 0 1 0 1.354-.65Zm.164 4.665a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Z"/></svg>Unverified</span>
+        <code class="commit-hash">a1b2c3d</code>
+      </div>
+      <div class="badge-demo-arrow">↓ run the script ↓</div>
+      <div class="commit-row">
+        <span class="commit-avatar"></span>
+        <span class="commit-msg">Fix login bug</span>
+        <span class="gh-badge verified"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 16A8 8 0 1 1 8 0a8 8 0 0 1 0 16Zm3.78-9.72a.75.75 0 0 0-1.06-1.06L6.75 9.19 5.28 7.72a.75.75 0 0 0-1.06 1.06l2 2a.75.75 0 0 0 1.06 0l4.5-4.5Z"/></svg>Verified</span>
+        <code class="commit-hash">a1b2c3d</code>
+      </div>
+    </div>
 
     <input class="tab-radio" type="radio" name="os" id="os-sh" checked>
     <input class="tab-radio" type="radio" name="os" id="os-win">
