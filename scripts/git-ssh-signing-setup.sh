@@ -163,7 +163,7 @@ detect_os() {
 }
 
 install_hint() {
-  local tool="$1"
+  local tool="$1" pkg="$1"
   case "$OS_NAME" in
     mac)
       if require_cmd brew; then
@@ -174,11 +174,21 @@ install_hint() {
       ;;
     linux)
       if require_cmd apt; then
-        echo "sudo apt install $tool"
+        [ "$tool" = "openssh" ] && pkg="openssh-client"
+        echo "sudo apt install $pkg"
       elif require_cmd dnf; then
-        echo "sudo dnf install $tool"
+        [ "$tool" = "openssh" ] && pkg="openssh-clients"
+        echo "sudo dnf install $pkg"
+      elif require_cmd yum; then
+        [ "$tool" = "openssh" ] && pkg="openssh-clients"
+        echo "sudo yum install $pkg"
       elif require_cmd pacman; then
         echo "sudo pacman -S $tool"
+      elif require_cmd zypper; then
+        echo "sudo zypper install $tool"
+      elif require_cmd apk; then
+        [ "$tool" = "openssh" ] && pkg="openssh-client"
+        echo "sudo apk add $pkg"
       else
         echo "install '$tool' with your distro's package manager"
       fi
