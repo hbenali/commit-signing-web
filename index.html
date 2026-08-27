@@ -32,6 +32,71 @@
 }
 </script>
 
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "New to Git entirely?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "This site assumes you already use Git day to day. If you don't yet: install it, then set your identity once with git config --global user.name \"Your Name\" and git config --global user.email \"you@example.com\". The everyday loop is git add (stage changes), git commit -m \"message\" (save them), and git push (send them to a remote like GitHub). The official Git documentation (git-scm.com/doc) — especially the free Pro Git book (git-scm.com/book/en/v2) — is the best place to actually learn it properly; come back here once commit and push feel routine."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why do my old commits still show \"Unverified\"?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Signing only applies going forward. Past commits keep whatever signature (or lack of one) they were made with — re-signing history means rewriting it, which isn't something this script does automatically."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What if gh isn't installed or isn't logged in?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The script falls back to printing the exact manual steps — copy the public key, and add it at github.com/settings/ssh/new yourself. Nothing blocks on the GitHub CLI being available."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What if my token is missing the signing-key scope?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "GitHub added a dedicated admin:ssh_signing_key scope for managing signing keys. If your upload fails because of it, the script recognizes the exact error and offers to run gh auth refresh -h github.com -s admin:ssh_signing_key for you, then retries automatically."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does this work on Windows?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes — a .bat version ships alongside the .sh one, with the same checks, GPG-migration prompt, and verification flow adapted for cmd.exe."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is it safe to just curl and run this?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The script downloads to a file first and only then executes — it never pipes into a shell — specifically so you have the chance to open and read it before running. Every change it makes is behind its own confirmation prompt."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does this work with GitLab or Gitea instead of GitHub?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Commit signing itself — SSH or GPG — is a git feature, not a GitHub one: it happens entirely on your machine and doesn't care which remote you push to. Only the upload-your-key step differs. The script's gh integration is GitHub-specific, so on GitLab or Gitea it'll fall back to manual instructions — add the same public key yourself under GitLab's SSH Keys settings (set usage type to Signing) or GPG Keys, or your Gitea instance's Settings → SSH/GPG Keys page. Everything else — the dedicated key, git config, and verification steps — is identical."
+      }
+    }
+  ]
+}
+</script>
+
 <style>
   :root {
     --bg: #ffffff;
@@ -97,8 +162,12 @@
     line-height: 1.55;
     -webkit-font-smoothing: antialiased;
   }
-  a { color: var(--link); text-decoration: none; }
-  a:hover { text-decoration: underline; }
+  a {
+    color: var(--link); text-decoration: underline; text-underline-offset: 2px;
+    text-decoration-color: color-mix(in srgb, var(--link) 45%, transparent);
+  }
+  a:hover { text-decoration-color: var(--link); }
+  .brand, .icon-btn, footer.site .foot-links a { text-decoration: none; }
   .skip-link {
     position: absolute; left: -999px; top: 0;
   }
@@ -129,6 +198,13 @@
   }
   .icon-btn:hover { border-color: var(--accent); }
   .icon-btn svg { width: 16px; height: 16px; }
+  .star-pill[hidden] { display: none; }
+  .star-pill {
+    display: inline-flex; align-items: center; gap: .25rem; margin-left: .1rem;
+    padding: .05rem .4rem; border-radius: 999px; background: var(--bg-inset); border: 1px solid var(--border);
+    font-size: .74rem; font-weight: 700; color: var(--warn);
+  }
+  .star-pill svg { width: 11px; height: 11px; }
 
   main { max-width: var(--max); margin: 0 auto; padding: 0 1.25rem; }
 
@@ -213,7 +289,7 @@
     border: 1px solid var(--border); border-left: 3px solid var(--accent);
     background: var(--bg-elevated); border-radius: var(--radius); padding: 1rem 1.2rem; margin-top: 1rem;
   }
-  .callout h4 { margin: 0 0 .4rem; font-size: .95rem; }
+  .callout h3 { margin: 0 0 .4rem; font-size: .95rem; }
   .callout ul { margin: 0; padding-left: 1.1rem; font-size: .88rem; color: var(--text-dim); }
   .callout li { margin-bottom: .3rem; }
 
@@ -308,11 +384,12 @@
       commitsign
     </span>
     <div class="nav-actions">
-      <a class="icon-btn" href="https://github.com/hbenali/commit-signing-web" rel="noopener">
+      <a class="icon-btn" href="https://github.com/hbenali/commit-signing-web" rel="noopener" title="Like it? Star the repo!">
         <svg viewBox="0 0 16 16" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
         GitHub
+        <span class="star-pill" id="star-count" hidden><svg viewBox="0 0 16 16" aria-hidden="true" fill="currentColor"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg><span id="star-count-num"></span></span>
       </a>
-      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Toggle color theme">
+      <button class="icon-btn" id="theme-toggle" type="button">
         <svg viewBox="0 0 16 16" aria-hidden="true" fill="currentColor"><path d="M8 1a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 8 1Zm0 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm7-4a.75.75 0 0 1 0 1.5h-1.5a.75.75 0 0 1 0-1.5H15ZM2.5 8a.75.75 0 0 1-.75.75H.25a.75.75 0 0 1 0-1.5h1.5A.75.75 0 0 1 2.5 8Zm10.65-5.15a.75.75 0 0 1 0 1.06l-1.06 1.06a.75.75 0 1 1-1.06-1.06l1.06-1.06a.75.75 0 0 1 1.06 0ZM4.97 11.03a.75.75 0 0 1 0 1.06l-1.06 1.06a.75.75 0 1 1-1.06-1.06l1.06-1.06a.75.75 0 0 1 1.06 0ZM8 13.75a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5a.75.75 0 0 1 .75-.75Zm4.94-1.66a.75.75 0 0 1 1.06 1.06l-1.06 1.06a.75.75 0 1 1-1.06-1.06l1.06-1.06ZM3.91 3.91a.75.75 0 0 1 1.06 0l1.06 1.06a.75.75 0 1 1-1.06 1.06L3.91 4.97a.75.75 0 0 1 0-1.06Z"/></svg>
         <span id="theme-label">Theme</span>
       </button>
@@ -333,7 +410,7 @@
 
     <input class="tab-radio" type="radio" name="os" id="os-sh" checked>
     <input class="tab-radio" type="radio" name="os" id="os-win">
-    <div class="tabbar" role="tablist" aria-label="Operating system">
+    <div class="tabbar">
       <label for="os-sh">macOS / Linux</label>
       <label for="os-win">Windows</label>
     </div>
@@ -429,7 +506,7 @@
 
     <input class="tab-radio" type="radio" name="man" id="man-ssh" checked>
     <input class="tab-radio" type="radio" name="man" id="man-gpg">
-    <div class="tabbar" role="tablist" aria-label="Manual signing method">
+    <div class="tabbar">
       <label for="man-ssh">SSH (recommended)</label>
       <label for="man-gpg">GPG (legacy)</label>
     </div>
@@ -438,7 +515,7 @@
       <div class="tab-panel" id="panel-ssh-manual">
         <input class="tab-radio" type="radio" name="sshos" id="sshos-sh" checked>
         <input class="tab-radio" type="radio" name="sshos" id="sshos-win">
-        <div class="tabbar" role="tablist" aria-label="Operating system">
+        <div class="tabbar">
           <label for="sshos-sh">macOS / Linux</label>
           <label for="sshos-win">Windows</label>
         </div>
@@ -557,7 +634,7 @@ git config --global commit.gpgsign true</code>
         </ol>
 
         <div class="callout">
-          <h4>GPG still works fine</h4>
+          <h3>GPG still works fine</h3>
           <p style="margin:0;color:var(--text-dim);font-size:.88rem;">It's just more machinery — a separate keyring and passphrase-agent setup — for a result SSH signing gets from a key format you probably already have. If you've already got a GPG setup, the script detects it and offers to migrate you to SSH instead of fighting it.</p>
           <p style="margin:.6rem 0 0;color:var(--text-dim);font-size:.88rem;">The commands above are identical on Windows — install <a href="https://gpg4win.org" rel="noopener">Gpg4win</a> first, then run them as-is in <code class="inline">cmd</code> or PowerShell.</p>
         </div>
@@ -578,7 +655,7 @@ git config --global commit.gpgsign true</code>
   <section id="why">
     <h2>A few things worth knowing</h2>
     <div class="callout">
-      <h4>Don't reuse your signing key for push authentication</h4>
+      <h3>Don't reuse your signing key for push authentication</h3>
       <ul>
         <li>A key used for both loses independence — rotating or revoking one breaks the other.</li>
         <li>When <code class="inline">gh auth login</code> asks you to select an SSH key for Git operations, pick a different one (or use HTTPS/token auth, which skips the question entirely).</li>
@@ -586,7 +663,7 @@ git config --global commit.gpgsign true</code>
       </ul>
     </div>
     <div class="callout">
-      <h4>Signing key ≠ authentication key on GitHub</h4>
+      <h3>Signing key ≠ authentication key on GitHub</h3>
       <p style="margin:0;color:var(--text-dim);font-size:.88rem;">GitHub tracks these as two separate key types under <a href="https://github.com/settings/keys" rel="noopener">Settings → SSH and GPG keys</a>. Adding a key as an Authentication key does <em>not</em> make it usable for signing, and vice versa — that's by design.</p>
     </div>
   </section>
@@ -670,7 +747,9 @@ git config --global commit.gpgsign true</code>
     }
     if (label) {
       var effective = theme || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-      label.textContent = effective === "dark" ? "Dark" : "Light";
+      var word = effective === "dark" ? "Dark" : "Light";
+      label.textContent = word;
+      if (toggle) toggle.setAttribute("aria-label", "Theme: " + word + " (click to switch)");
     }
   }
 
@@ -759,13 +838,13 @@ git config --global commit.gpgsign true</code>
   }
 
   function renderSshCard(result) {
-    var html = '<div class="verify-card"><h4>SSH Signing Keys';
+    var html = '<div class="verify-card"><h3>SSH Signing Keys';
     if (result.error) {
-      html += '<span class="verify-badge danger">error</span></h4><p class="verify-hint">' + errorMessage(result.error) + '</p></div>';
+      html += '<span class="verify-badge danger">error</span></h3><p class="verify-hint">' + errorMessage(result.error) + '</p></div>';
       return html;
     }
     var keys = result.data || [];
-    html += '<span class="count-badge">' + keys.length + '</span></h4>';
+    html += '<span class="count-badge">' + keys.length + '</span></h3>';
     if (!keys.length) {
       html += '<p class="verify-hint">No SSH signing keys registered.</p>';
     } else {
@@ -781,13 +860,13 @@ git config --global commit.gpgsign true</code>
   }
 
   function renderGpgCard(result) {
-    var html = '<div class="verify-card"><h4>GPG Keys';
+    var html = '<div class="verify-card"><h3>GPG Keys';
     if (result.error) {
-      html += '<span class="verify-badge danger">error</span></h4><p class="verify-hint">' + errorMessage(result.error) + '</p></div>';
+      html += '<span class="verify-badge danger">error</span></h3><p class="verify-hint">' + errorMessage(result.error) + '</p></div>';
       return html;
     }
     var keys = result.data || [];
-    html += '<span class="count-badge">' + keys.length + '</span></h4>';
+    html += '<span class="count-badge">' + keys.length + '</span></h3>';
     var hasExpired = false;
     if (!keys.length) {
       html += '<p class="verify-hint">No GPG keys registered.</p>';
@@ -822,6 +901,21 @@ git config --global commit.gpgsign true</code>
         verifyResults.innerHTML = '<div class="verify-grid">' + renderSshCard(res[0]) + renderGpgCard(res[1]) + '</div>';
       });
     });
+  }
+
+  // Live GitHub star count on the header link — best-effort, fails silently
+  var starPill = document.getElementById("star-count");
+  var starNum = document.getElementById("star-count-num");
+  if (starPill && starNum) {
+    fetch("https://api.github.com/repos/hbenali/commit-signing-web")
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        var count = data && typeof data.stargazers_count === "number" ? data.stargazers_count : null;
+        if (!count) return;
+        starNum.textContent = count >= 1000 ? (count / 1000).toFixed(1) + "k" : String(count);
+        starPill.hidden = false;
+      })
+      .catch(function () {});
   }
 
   // Scroll-to-top button
