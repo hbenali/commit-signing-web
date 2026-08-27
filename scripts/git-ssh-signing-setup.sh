@@ -45,7 +45,7 @@ print_banner() {
   printf "%b" "${CYAN}${BOLD}"
   cat <<'EOF'
 ╔══════════════════════════════════════════════════════╗
-║        Git SSH Commit Signing — Setup Wizard          ║
+║        Git SSH Commit Signing — Setup Wizard         ║
 ╚══════════════════════════════════════════════════════╝
 EOF
   printf "%b\n" "${NC}"
@@ -56,7 +56,7 @@ print_success_banner() {
   printf "%b" "${GREEN}${BOLD}"
   cat <<'EOF'
 ╔══════════════════════════════════════════════════════╗
-║        ✓  SSH commit signing setup complete!          ║
+║        ✓  SSH commit signing setup complete!         ║
 ╚══════════════════════════════════════════════════════╝
 EOF
   printf "%b\n" "${NC}"
