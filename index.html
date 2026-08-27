@@ -328,16 +328,22 @@
   .callout ul { margin: 0; padding-left: 1.1rem; font-size: .88rem; color: var(--text-dim); }
   .callout li { margin-bottom: .3rem; }
 
-  .changelog-list { margin: 0; padding: 0; list-style: none; }
-  .changelog-list li {
-    position: relative; padding: .6rem 0 .6rem 1.6rem; border-top: 1px solid var(--border);
-    font-size: .92rem; color: var(--text-dim);
+  .term-window { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; text-align: left; }
+  .term-bar {
+    display: flex; align-items: center; gap: .4rem; padding: .55rem .8rem;
+    background: var(--bg-elevated); border-bottom: 1px solid var(--border);
   }
-  .changelog-list li:first-child { border-top: none; }
-  .changelog-list li::before {
-    content: ""; position: absolute; left: 0; top: 1.05rem; width: 8px; height: 8px;
-    border-radius: 999px; background: var(--accent);
+  .term-dot { width: 10px; height: 10px; border-radius: 999px; flex-shrink: 0; }
+  .term-dot.red { background: #ff5f56; }
+  .term-dot.yellow { background: #ffbd2e; }
+  .term-dot.green { background: #27c93f; }
+  .term-title { margin-left: .5rem; font-size: .78rem; color: var(--text-dim); font-family: var(--font-mono); }
+  .term-body {
+    margin: 0; padding: 1rem 1.1rem; background: var(--bg-inset);
+    font-family: var(--font-mono); font-size: .82rem; color: var(--code-text);
+    overflow-x: auto; line-height: 1.9; white-space: pre;
   }
+  .term-hash { color: var(--warn); font-weight: 600; }
 
   details.faq {
     border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-elevated);
@@ -426,7 +432,7 @@
 <header class="site">
   <div class="nav">
     <span class="brand">
-      <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0d1117"/><path d="M40 14a12 12 0 1 0 4.24 23.24L47 40l3-3 3 3 4-4-3-3 3-3-4-4-3 3-2.76-2.76A12 12 0 0 0 40 14Zm0 6a6 6 0 1 1 0 12 6 6 0 0 1 0-12Z" fill="#3fb950"/></svg>
+      <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="var(--bg-elevated)" stroke="var(--border)" stroke-width="1"/><path d="M40 14a12 12 0 1 0 4.24 23.24L47 40l3-3 3 3 4-4-3-3 3-3-4-4-3 3-2.76-2.76A12 12 0 0 0 40 14Zm0 6a6 6 0 1 1 0 12 6 6 0 0 1 0-12Z" fill="var(--accent)"/></svg>
       commitsign
     </span>
     <div class="nav-actions">
@@ -436,7 +442,8 @@
         <span class="star-pill" id="star-count" hidden><svg viewBox="0 0 16 16" aria-hidden="true" fill="currentColor"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg><span id="star-count-num"></span></span>
       </a>
       <button class="icon-btn" id="theme-toggle" type="button">
-        <svg viewBox="0 0 16 16" aria-hidden="true" fill="currentColor"><path d="M8 1a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 8 1Zm0 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm7-4a.75.75 0 0 1 0 1.5h-1.5a.75.75 0 0 1 0-1.5H15ZM2.5 8a.75.75 0 0 1-.75.75H.25a.75.75 0 0 1 0-1.5h1.5A.75.75 0 0 1 2.5 8Zm10.65-5.15a.75.75 0 0 1 0 1.06l-1.06 1.06a.75.75 0 1 1-1.06-1.06l1.06-1.06a.75.75 0 0 1 1.06 0ZM4.97 11.03a.75.75 0 0 1 0 1.06l-1.06 1.06a.75.75 0 1 1-1.06-1.06l1.06-1.06a.75.75 0 0 1 1.06 0ZM8 13.75a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5a.75.75 0 0 1 .75-.75Zm4.94-1.66a.75.75 0 0 1 1.06 1.06l-1.06 1.06a.75.75 0 1 1-1.06-1.06l1.06-1.06ZM3.91 3.91a.75.75 0 0 1 1.06 0l1.06 1.06a.75.75 0 1 1-1.06 1.06L3.91 4.97a.75.75 0 0 1 0-1.06Z"/></svg>
+        <svg id="icon-sun" viewBox="0 0 16 16" aria-hidden="true" fill="currentColor" style="display:none"><path d="M8 1a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 8 1Zm0 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm7-4a.75.75 0 0 1 0 1.5h-1.5a.75.75 0 0 1 0-1.5H15ZM2.5 8a.75.75 0 0 1-.75.75H.25a.75.75 0 0 1 0-1.5h1.5A.75.75 0 0 1 2.5 8Zm10.65-5.15a.75.75 0 0 1 0 1.06l-1.06 1.06a.75.75 0 1 1-1.06-1.06l1.06-1.06a.75.75 0 0 1 1.06 0ZM4.97 11.03a.75.75 0 0 1 0 1.06l-1.06 1.06a.75.75 0 1 1-1.06-1.06l1.06-1.06a.75.75 0 0 1 1.06 0ZM8 13.75a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5a.75.75 0 0 1 .75-.75Zm4.94-1.66a.75.75 0 0 1 1.06 1.06l-1.06 1.06a.75.75 0 1 1-1.06-1.06l1.06-1.06ZM3.91 3.91a.75.75 0 0 1 1.06 0l1.06 1.06a.75.75 0 1 1-1.06 1.06L3.91 4.97a.75.75 0 0 1 0-1.06Z"/></svg>
+        <svg id="icon-moon" viewBox="0 0 16 16" aria-hidden="true" fill="currentColor" style="display:none"><path d="M9.598 1.591a.75.75 0 0 1 .785-.128 7 7 0 1 1-8.874 8.875.75.75 0 0 1 .656-1.03 5.5 5.5 0 0 0 7.271-7.27.75.75 0 0 1 .162-.447Zm1.196 1.653a7 7 0 0 1-8.51 8.509 5.5 5.5 0 0 0 8.51-8.51Z"/></svg>
         <span id="theme-label">Theme</span>
       </button>
     </div>
@@ -765,15 +772,21 @@ git config --global commit.gpgsign true</code>
 
   <section id="changelog">
     <h2>Recently added</h2>
-    <p class="section-lead">Actively maintained — a few highlights from the latest round of changes.</p>
-    <ul class="changelog-list">
-      <li>Live <a href="#verify">GitHub key verification</a> — check any username's SSH signing and GPG keys straight from GitHub's API.</li>
-      <li>Auto-recovery when a <code class="inline">gh</code> token is missing the <code class="inline">admin:ssh_signing_key</code> scope — refreshes it and retries automatically.</li>
-      <li>GPG → SSH migration detection, with your existing config backed up before anything changes.</li>
-      <li>Install hints across six package managers — <code class="inline">apt</code>, <code class="inline">dnf</code>, <code class="inline">yum</code>, <code class="inline">pacman</code>, <code class="inline">zypper</code>, <code class="inline">apk</code>.</li>
-      <li>Separate prompts for commit vs. tag signing, and a warning before reusing a signing key for Git push authentication.</li>
-      <li>A full Windows manual guide, with OS auto-detection picking the right tab for you.</li>
-    </ul>
+    <p class="section-lead">Actively maintained — this is the actual commit history, not a curated highlight reel.</p>
+    <div class="term-window">
+      <div class="term-bar">
+        <span class="term-dot red"></span><span class="term-dot yellow"></span><span class="term-dot green"></span>
+        <span class="term-title">git log --oneline</span>
+      </div>
+      <pre class="term-body"><code><span class="term-hash">63582bb</span> Add Open Graph image and recently-added changelog section
+<span class="term-hash">e1d0048</span> Add Unverified/Verified badge visual to hero
+<span class="term-hash">c00801c</span> Bump GitHub Actions to latest major versions
+<span class="term-hash">a291aaf</span> Fix accessibility issues (Lighthouse 100), add FAQ structured data, GitHub star count
+<span class="term-hash">d5f9ba4</span> Add Windows manual steps, curl/wget prereq, GitHub key verification tool
+<span class="term-hash">1aae731</span> Support dnf/yum/pacman/zypper/apk in install hints, fix openssh package name
+<span class="term-hash">68420ea</span> Initial commit: signing setup scripts + doc site</code></pre>
+    </div>
+    <p class="hint" style="margin-top:.9rem;"><span class="gh-badge verified"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 16A8 8 0 1 1 8 0a8 8 0 0 1 0 16Zm3.78-9.72a.75.75 0 0 0-1.06-1.06L6.75 9.19 5.28 7.72a.75.75 0 0 0-1.06 1.06l2 2a.75.75 0 0 0 1.06 0l4.5-4.5Z"/></svg>Verified</span> — every commit above is genuinely SSH-signed, not just an example.</p>
   </section>
 
 </main>
@@ -813,6 +826,8 @@ git config --global commit.gpgsign true</code>
   var KEY = "commitsign-theme";
   var toggle = document.getElementById("theme-toggle");
   var label = document.getElementById("theme-label");
+  var iconSun = document.getElementById("icon-sun");
+  var iconMoon = document.getElementById("icon-moon");
 
   function apply(theme) {
     if (theme === "light" || theme === "dark") {
@@ -825,6 +840,8 @@ git config --global commit.gpgsign true</code>
       var word = effective === "dark" ? "Dark" : "Light";
       label.textContent = word;
       if (toggle) toggle.setAttribute("aria-label", "Theme: " + word + " (click to switch)");
+      if (iconSun) iconSun.style.display = effective === "light" ? "" : "none";
+      if (iconMoon) iconMoon.style.display = effective === "dark" ? "" : "none";
     }
   }
 
