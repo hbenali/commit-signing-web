@@ -578,6 +578,10 @@ git config --global commit.gpgsign true</code>
   <section id="faq">
     <h2>FAQ</h2>
     <details class="faq">
+      <summary>New to Git entirely?</summary>
+      <p>This site assumes you already use Git day to day. If you don't yet: install it, then set your identity once with <code class="inline">git config --global user.name "Your Name"</code> and <code class="inline">git config --global user.email "you@example.com"</code>. The everyday loop is <code class="inline">git add</code> (stage changes), <code class="inline">git commit -m "message"</code> (save them), and <code class="inline">git push</code> (send them to a remote like GitHub). The <a href="https://git-scm.com/doc" rel="noopener">official Git documentation</a> — especially the free <a href="https://git-scm.com/book/en/v2" rel="noopener">Pro Git book</a> — is the best place to actually learn it properly; come back here once commit and push feel routine.</p>
+    </details>
+    <details class="faq">
       <summary>Why do my old commits still show "Unverified"?</summary>
       <p>Signing only applies going forward. Past commits keep whatever signature (or lack of one) they were made with — re-signing history means rewriting it, which isn't something this script does automatically.</p>
     </details>
