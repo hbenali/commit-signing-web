@@ -999,7 +999,7 @@ git config --global commit.gpgsign true</code>
   var starPill = document.getElementById("star-count");
   var starNum = document.getElementById("star-count-num");
   if (starPill && starNum) {
-    fetch("https://api.github.com/repos/hbenali/commit-signing-web")
+    fetch("https://api.github.com/repos/hbenali/commit-signing-web", { cache: "no-store" })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (data) {
         var count = data && typeof data.stargazers_count === "number" ? data.stargazers_count : null;
