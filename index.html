@@ -14,9 +14,14 @@
 <meta property="og:title" content="CommitSign — set up Git commit signing in one command">
 <meta property="og:description" content="Copy, paste, done: SSH commit signing setup with GPG migration, gh CLI integration, and real verification. Plus manual SSH and GPG guides.">
 <meta property="og:url" content="https://commitsign.hbenali.ovh/">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="https://commitsign.hbenali.ovh/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="CommitSign — Sign every commit. No more &quot;Unverified&quot; badges.">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="CommitSign — set up Git commit signing in one command">
 <meta name="twitter:description" content="Copy, paste, done: SSH commit signing setup with GPG migration, gh CLI integration, and real verification.">
+<meta name="twitter:image" content="https://commitsign.hbenali.ovh/og-image.png">
 
 <script type="application/ld+json">
 {
@@ -322,6 +327,17 @@
   .callout h3 { margin: 0 0 .4rem; font-size: .95rem; }
   .callout ul { margin: 0; padding-left: 1.1rem; font-size: .88rem; color: var(--text-dim); }
   .callout li { margin-bottom: .3rem; }
+
+  .changelog-list { margin: 0; padding: 0; list-style: none; }
+  .changelog-list li {
+    position: relative; padding: .6rem 0 .6rem 1.6rem; border-top: 1px solid var(--border);
+    font-size: .92rem; color: var(--text-dim);
+  }
+  .changelog-list li:first-child { border-top: none; }
+  .changelog-list li::before {
+    content: ""; position: absolute; left: 0; top: 1.05rem; width: 8px; height: 8px;
+    border-radius: 999px; background: var(--accent);
+  }
 
   details.faq {
     border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-elevated);
@@ -745,6 +761,19 @@ git config --global commit.gpgsign true</code>
       <summary>Does this work with GitLab or Gitea instead of GitHub?</summary>
       <p>Commit signing itself — SSH or GPG — is a git feature, not a GitHub one: it happens entirely on your machine and doesn't care which remote you push to. Only the "upload your key" step differs. The script's <code class="inline">gh</code> integration is GitHub-specific, so on GitLab or Gitea it'll fall back to manual instructions — add the same public key yourself under GitLab's <a href="https://gitlab.com/-/user_settings/ssh_keys" rel="noopener">SSH Keys</a> settings (set usage type to "Signing") or <a href="https://gitlab.com/-/profile/gpg_keys" rel="noopener">GPG Keys</a>, or your Gitea instance's Settings → SSH/GPG Keys page. Everything else — the dedicated key, git config, and verification steps — is identical.</p>
     </details>
+  </section>
+
+  <section id="changelog">
+    <h2>Recently added</h2>
+    <p class="section-lead">Actively maintained — a few highlights from the latest round of changes.</p>
+    <ul class="changelog-list">
+      <li>Live <a href="#verify">GitHub key verification</a> — check any username's SSH signing and GPG keys straight from GitHub's API.</li>
+      <li>Auto-recovery when a <code class="inline">gh</code> token is missing the <code class="inline">admin:ssh_signing_key</code> scope — refreshes it and retries automatically.</li>
+      <li>GPG → SSH migration detection, with your existing config backed up before anything changes.</li>
+      <li>Install hints across six package managers — <code class="inline">apt</code>, <code class="inline">dnf</code>, <code class="inline">yum</code>, <code class="inline">pacman</code>, <code class="inline">zypper</code>, <code class="inline">apk</code>.</li>
+      <li>Separate prompts for commit vs. tag signing, and a warning before reusing a signing key for Git push authentication.</li>
+      <li>A full Windows manual guide, with OS auto-detection picking the right tab for you.</li>
+    </ul>
   </section>
 
 </main>
