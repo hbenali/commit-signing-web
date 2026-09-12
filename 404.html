@@ -9,6 +9,8 @@
 <link rel="canonical" href="https://commitsign.hbenali.ovh/404.html">
 <meta name="theme-color" content="#0d1117">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 
 <style>
   :root {
@@ -22,6 +24,7 @@
     --accent-contrast: #ffffff;
     --link: #0969da;
     --danger: #cf222e;
+    --danger-badge: #a40e26;
     --radius: 10px;
     --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
@@ -40,6 +43,7 @@
       --accent-contrast: #0d1117;
       --link: #58a6ff;
       --danger: #f85149;
+      --danger-badge: #ff8177;
     }
   }
 
@@ -54,6 +58,7 @@
     --accent-contrast: #0d1117;
     --link: #58a6ff;
     --danger: #f85149;
+    --danger-badge: #ff8177;
   }
 
   * { box-sizing: border-box; }
@@ -125,7 +130,7 @@
   .gh-badge svg { width: 12px; height: 12px; }
   .gh-badge.notfound {
     background: color-mix(in srgb, var(--danger) 15%, transparent);
-    border-color: color-mix(in srgb, var(--danger) 40%, transparent); color: var(--danger);
+    border-color: color-mix(in srgb, var(--danger) 40%, transparent); color: var(--danger-badge);
   }
 
   .codeblock {
