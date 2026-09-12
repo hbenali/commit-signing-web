@@ -1,0 +1,12 @@
+# CommitSign
+
+> Interactive setup scripts for Git SSH commit signing, plus a doc site with manual SSH and GPG guides.
+
+Live at https://commitsign.hbenali.ovh. The setup scripts detect an existing GPG signing setup and offer to migrate, generate (or reuse) a key dedicated to signing only, detect the GitHub CLI and upload the key (recovering from a missing `admin:ssh_signing_key` token scope automatically), configure `commit.gpgsign`/`tag.gpgsign` separately, and finish with a real signed test commit to verify everything actually works.
+
+## Pages
+- [CommitSign](https://commitsign.hbenali.ovh/): the doc site, quick-use instructions, and manual SSH/GPG guides.
+
+## Scripts
+- [git-ssh-signing-setup.sh](https://raw.githubusercontent.com/hbenali/commit-signing-web/main/scripts/git-ssh-signing-setup.sh): Linux/macOS setup script.
+- [git-ssh-signing-setup.bat](https://raw.githubusercontent.com/hbenali/commit-signing-web/main/scripts/git-ssh-signing-setup.bat): Windows setup script.
