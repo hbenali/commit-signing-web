@@ -39,6 +39,11 @@
     --sodium: #e9a23b;
     --verdigris: #5db7a0;
     --fail: #e5776f;
+    --glow: rgba(233, 162, 59, 0.2);
+    --glow-soft: rgba(233, 162, 59, 0.06);
+    --glass: rgba(12, 18, 24, 0.82);
+    --wash: rgba(23, 33, 43, 0.6);
+    --rule: rgba(38, 51, 65, 0.7);
 
     --display: 'Big Shoulders', 'Arial Narrow', Impact, sans-serif;
     --serif: 'Newsreader', Georgia, serif;
@@ -46,6 +51,27 @@
 
     --gutter: clamp(1.5rem, 4vw, 2.5rem);
     color-scheme: dark;
+}
+
+/* Light: follows the system setting, no toggle. Dark above is the default and the identity.
+   Contrast on --ink (page) / --slate (surface): text 16:1, muted 6.0/5.4, accent 5.5/4.9, ok 5.2/4.7, fail 5.7/5.1. */
+@media (prefers-color-scheme: light) {
+    :root {
+        --ink: #f4efe4;
+        --slate: #e9e3d4;
+        --line: #cbc3b0;
+        --bone: #0c1218;
+        --mist: #4f5b67;
+        --sodium: #8a5300;
+        --verdigris: #1b7058;
+        --fail: #b3261e;
+        --glow: rgba(233, 162, 59, 0.22);
+        --glow-soft: rgba(233, 162, 59, 0.07);
+        --glass: rgba(244, 239, 228, 0.86);
+        --wash: rgba(233, 227, 212, 0.7);
+        --rule: rgba(203, 195, 176, 0.8);
+        color-scheme: light;
+    }
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -110,8 +136,8 @@ code.inline {
 /* ───────────── Top bar ───────────── */
 .bar {
     position: fixed; inset: 0 0 auto 0; z-index: 40;
-    border-bottom: 1px solid rgba(38, 51, 65, 0.7);
-    background: rgba(12, 18, 24, 0.82);
+    border-bottom: 1px solid var(--rule);
+    background: var(--glass);
     -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
 }
 .bar-inner {
@@ -133,7 +159,7 @@ code.inline {
 .hero::before {
     content: ''; position: absolute; z-index: -1; top: -14rem; right: -12rem;
     width: min(46rem, 140vw); aspect-ratio: 1; border-radius: 50%;
-    background: radial-gradient(closest-side, rgba(233, 162, 59, 0.2), rgba(233, 162, 59, 0.06) 55%, transparent);
+    background: radial-gradient(closest-side, var(--glow), var(--glow-soft) 55%, transparent);
     pointer-events: none;
 }
 .hero h1 { font-size: clamp(2.7rem, 7.2vw, 7.5rem); margin-left: -0.03em; }
@@ -320,7 +346,7 @@ details.faq.in-panel .codeblock { margin-top: 0.75rem; }
 .scroll-top-btn {
     position: fixed; right: var(--gutter); bottom: 1.25rem; z-index: 30;
     width: 2.75rem; height: 2.75rem; border: 1px solid var(--mist); border-radius: 2px;
-    background: rgba(12, 18, 24, 0.9); color: var(--bone); cursor: pointer; padding: 0;
+    background: var(--glass); color: var(--bone); cursor: pointer; padding: 0;
     display: flex; align-items: center; justify-content: center;
     opacity: 0; transform: translateY(8px); pointer-events: none;
     transition: opacity 0.2s, transform 0.2s, border-color 0.2s, color 0.2s;
@@ -333,13 +359,13 @@ details.faq.in-panel .codeblock { margin-top: 0.75rem; }
 .nf { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding-block: 7rem 4rem; position: relative; isolation: isolate; overflow: hidden; }
 .nf::before {
     content: ''; position: absolute; z-index: -1; top: -12rem; right: -10rem; width: min(40rem, 140vw); aspect-ratio: 1; border-radius: 50%;
-    background: radial-gradient(closest-side, rgba(233, 162, 59, 0.2), rgba(233, 162, 59, 0.06) 55%, transparent);
+    background: radial-gradient(closest-side, var(--glow), var(--glow-soft) 55%, transparent);
 }
 .nf-code { font-size: clamp(6rem, 24vw, 18rem); color: var(--sodium); }
 .nf h1 { font-size: clamp(2.8rem, 7vw, 5rem); margin-top: 0.5rem; }
 .nf .nf-lead { margin-top: 1rem; max-width: 36ch; color: var(--mist); font-size: 1.3rem; }
 .nf-links { margin-top: 2rem; display: flex; flex-wrap: wrap; gap: 0.75rem 2rem; font-size: 1.25rem; }
-.nf-log { margin-top: 3rem; max-width: 44rem; overflow-wrap: anywhere; border: 1px solid var(--line); background: rgba(23, 33, 43, 0.6); padding: 1.25rem 1.5rem; font: 0.875rem/1.8 var(--mono); border-radius: 2px; }
+.nf-log { margin-top: 3rem; max-width: 44rem; overflow-wrap: anywhere; border: 1px solid var(--line); background: var(--wash); padding: 1.25rem 1.5rem; font: 0.875rem/1.8 var(--mono); border-radius: 2px; }
 .nf-log .err { color: var(--sodium); }
 .nf-log .dim { color: var(--mist); }
 .nf-foot { margin-top: 3rem; color: var(--mist); font-size: 1rem; max-width: 60ch; }

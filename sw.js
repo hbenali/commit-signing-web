@@ -1,4 +1,4 @@
-const CACHE_NAME = 'commitsign-v2';
+const CACHE_NAME = 'commitsign-v3';
 const PRECACHE_URLS = [
   '/',
   '/index.html',
