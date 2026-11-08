@@ -1,4 +1,4 @@
-const CACHE_NAME = 'commitsign-v1';
+const CACHE_NAME = 'commitsign-v2';
 const PRECACHE_URLS = [
   '/',
   '/index.html',
@@ -6,7 +6,14 @@ const PRECACHE_URLS = [
   '/manifest.json',
   '/favicon.svg',
   '/icon-192.png',
-  '/icon-512.png'
+  '/icon-512.png',
+  '/site.css',
+  '/app.js',
+  '/404.js',
+  '/fonts/big-shoulders-latin-wght.woff2',
+  '/fonts/newsreader-latin-wght.woff2',
+  '/fonts/newsreader-italic-latin-wght.woff2',
+  '/fonts/jetbrains-mono-latin-wght.woff2'
 ];
 
 self.addEventListener('install', (event) => {
@@ -30,7 +37,7 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
 
   const url = new URL(request.url);
-  // Never intercept cross-origin calls (the GitHub star-count API) — those must always hit the network.
+  // Never intercept cross-origin calls — those must always hit the network.
   if (url.origin !== self.location.origin) return;
 
   event.respondWith(

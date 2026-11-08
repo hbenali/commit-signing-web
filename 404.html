@@ -7,226 +7,40 @@
 <meta name="description" content="The page you're looking for doesn't exist. Head back to CommitSign to set up Git commit signing.">
 <meta name="robots" content="noindex, follow">
 <link rel="canonical" href="https://commitsign.hbenali.ovh/404.html">
-<meta name="theme-color" content="#0d1117">
+<meta name="theme-color" content="#0c1218">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 
-<style>
-  :root {
-    --bg: #ffffff;
-    --bg-elevated: #f6f8fa;
-    --bg-inset: #eef1f4;
-    --border: #d0d7de;
-    --text: #1f2328;
-    --text-dim: #59636e;
-    --accent: #1a7f37;
-    --accent-contrast: #ffffff;
-    --link: #0969da;
-    --danger: #cf222e;
-    --danger-badge: #a40e26;
-    --radius: 10px;
-    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
-    --max: 880px;
-  }
-
-  :root:not([data-theme="light"]) {
-    @media (prefers-color-scheme: dark) {
-      --bg: #0d1117;
-      --bg-elevated: #161b22;
-      --bg-inset: #0a0d12;
-      --border: #30363d;
-      --text: #e6edf3;
-      --text-dim: #9198a1;
-      --accent: #3fb950;
-      --accent-contrast: #0d1117;
-      --link: #58a6ff;
-      --danger: #f85149;
-      --danger-badge: #ff8177;
-    }
-  }
-
-  :root[data-theme="dark"] {
-    --bg: #0d1117;
-    --bg-elevated: #161b22;
-    --bg-inset: #0a0d12;
-    --border: #30363d;
-    --text: #e6edf3;
-    --text-dim: #9198a1;
-    --accent: #3fb950;
-    --accent-contrast: #0d1117;
-    --link: #58a6ff;
-    --danger: #f85149;
-    --danger-badge: #ff8177;
-  }
-
-  * { box-sizing: border-box; }
-  html { color-scheme: light dark; }
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font-sans);
-    line-height: 1.55;
-    -webkit-font-smoothing: antialiased;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-  a { color: var(--link); text-decoration: underline; text-underline-offset: 2px; }
-  .brand, .icon-btn, footer.site .foot-links a { text-decoration: none; }
-
-  header.site {
-    position: sticky; top: 0; z-index: 20;
-    background: color-mix(in srgb, var(--bg) 88%, transparent);
-    backdrop-filter: saturate(140%) blur(8px);
-    border-bottom: 1px solid var(--border);
-  }
-  .nav {
-    max-width: var(--max); margin: 0 auto; padding: .9rem 1.25rem;
-    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-  }
-  .brand { display: flex; align-items: center; gap: .55rem; font-weight: 700; font-size: 1.05rem; color: var(--text); }
-  .brand svg { width: 24px; height: 24px; flex-shrink: 0; }
-  .icon-btn {
-    display: inline-flex; align-items: center; gap: .4rem;
-    background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text);
-    border-radius: 8px; padding: .45rem .7rem; font-size: .85rem; cursor: pointer;
-    font-family: inherit;
-  }
-  .icon-btn:hover { border-color: var(--accent); }
-  .icon-btn svg { width: 16px; height: 16px; }
-
-  main { max-width: var(--max); margin: 0 auto; padding: 0 1.25rem; flex: 1; width: 100%; }
-
-  .hero { padding: 3.5rem 0 2rem; text-align: center; }
-  .badge-row { display: flex; justify-content: center; gap: .5rem; flex-wrap: wrap; margin-bottom: 1.6rem; }
-  .badge {
-    font-size: .75rem; font-weight: 600; padding: .25rem .6rem; border-radius: 999px;
-    background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-dim);
-  }
-  h1 { font-size: clamp(1.7rem, 4.2vw, 2.5rem); line-height: 1.15; margin: 0 0 .7rem; letter-spacing: -.01em; }
-  p.lead { color: var(--text-dim); font-size: 1.05rem; max-width: 560px; margin: 0 auto 2rem; }
-
-  .codeblock {
-    background: var(--bg-inset); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 1rem 1.1rem; text-align: left;
-    overflow-x: auto; margin: 0 auto 2rem; max-width: 480px;
-  }
-  .codeblock code {
-    font-family: var(--font-mono); font-size: .82rem; color: var(--text);
-    white-space: pre; display: block;
-  }
-  .codeblock .c-comment { color: var(--text-dim); }
-  .codeblock .c-danger { color: var(--danger); }
-  .codeblock .c-accent { color: var(--accent); }
-
-  .btn-primary {
-    display: inline-flex; align-items: center; gap: .5rem;
-    background: var(--accent); color: var(--accent-contrast); font-weight: 700;
-    text-decoration: none; padding: .65rem 1.3rem; border-radius: 999px; font-size: .9rem;
-  }
-
-  footer.site {
-    border-top: 1px solid var(--border); padding: 2rem 0 3rem; text-align: center;
-    color: var(--text-dim); font-size: .85rem;
-  }
-  footer.site a { color: var(--text-dim); }
-  footer.site .foot-links { display: flex; justify-content: center; gap: 1.2rem; margin-bottom: .7rem; flex-wrap: wrap; }
-</style>
+<!-- Absolute paths: this page is served for any missing URL, at any depth -->
+<link rel="preload" as="font" type="font/woff2" href="/fonts/big-shoulders-latin-wght.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/fonts/newsreader-latin-wght.woff2" crossorigin>
+<link rel="stylesheet" href="/site.css">
+<script src="/404.js" defer></script>
 </head>
 <body>
 
-<header class="site">
-  <div class="nav">
-    <span class="brand">
-      <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="var(--bg-elevated)" stroke="var(--border)" stroke-width="1"/><path d="M40 14a12 12 0 1 0 4.24 23.24L47 40l3-3 3 3 4-4-3-3 3-3-4-4-3 3-2.76-2.76A12 12 0 0 0 40 14Zm0 6a6 6 0 1 1 0 12 6 6 0 0 1 0-12Z" fill="var(--accent)"/></svg>
-      commitsign
-    </span>
-    <div class="nav-actions">
-      <button class="icon-btn" id="theme-toggle" type="button">
-        <svg id="icon-sun" viewBox="0 0 16 16" aria-hidden="true" fill="currentColor" style="display:none"><path d="M8 1a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 8 1Zm0 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm7-4a.75.75 0 0 1 0 1.5h-1.5a.75.75 0 0 1 0-1.5H15ZM2.5 8a.75.75 0 0 1-.75.75H.25a.75.75 0 0 1 0-1.5h1.5A.75.75 0 0 1 2.5 8Zm10.65-5.15a.75.75 0 0 1 0 1.06l-1.06 1.06a.75.75 0 1 1-1.06-1.06l1.06-1.06a.75.75 0 0 1 1.06 0ZM4.97 11.03a.75.75 0 0 1 0 1.06l-1.06 1.06a.75.75 0 1 1-1.06-1.06l1.06-1.06a.75.75 0 0 1 1.06 0ZM8 13.75a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5a.75.75 0 0 1 .75-.75Zm4.94-1.66a.75.75 0 0 1 1.06 1.06l-1.06 1.06a.75.75 0 1 1-1.06-1.06l1.06-1.06ZM3.91 3.91a.75.75 0 0 1 1.06 0l1.06 1.06a.75.75 0 1 1-1.06 1.06L3.91 4.97a.75.75 0 0 1 0-1.06Z"/></svg>
-        <svg id="icon-moon" viewBox="0 0 16 16" aria-hidden="true" fill="currentColor" style="display:none"><path d="M9.598 1.591a.75.75 0 0 1 .785-.128 7 7 0 1 1-8.874 8.875.75.75 0 0 1 .656-1.03 5.5 5.5 0 0 0 7.271-7.27.75.75 0 0 1 .162-.447Zm1.196 1.653a7 7 0 0 1-8.51 8.509 5.5 5.5 0 0 0 8.51-8.51Z"/></svg>
-        <span id="theme-label">Theme</span>
-      </button>
-    </div>
+<header class="bar">
+  <div class="bar-inner">
+    <a class="mark" href="/"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M40 14a12 12 0 1 0 4.24 23.24L47 40l3-3 3 3 4-4-3-3 3-3-4-4-3 3-2.76-2.76A12 12 0 0 0 40 14Zm0 6a6 6 0 1 1 0 12 6 6 0 0 1 0-12Z"/><path opacity=".55" d="M18 30a4 4 0 1 0 0 8h1v4h4v-4h1v-4h-1a4 4 0 0 0-5-4Z"/></svg>commitsign</a>
   </div>
 </header>
 
-<main>
-  <section class="hero">
-    <div class="badge-row">
-      <span class="badge">HTTP 404</span>
-    </div>
-    <h1>This page doesn't exist.</h1>
-    <p class="lead">The path you followed isn't part of this site — it was never published, or it's moved.</p>
+<main class="nf wrap" id="main">
+  <p class="display nf-code">HTTP 404</p>
+  <h1 class="display">This page doesn't exist.</h1>
+  <p class="nf-lead">The path you followed isn't part of this site — it was never published, or it's moved.</p>
 
-    <div class="codeblock">
-      <code><span class="c-comment">$ cat</span> <span id="pathCode">HEAD</span>
-<span class="c-danger">cat: no such file in this repository</span></code>
-    </div>
+  <p class="nf-log"><span class="dim">$ cat</span> <span id="pathCode">HEAD</span><br><span class="err">cat: no such file in this repository</span></p>
 
-    <a href="/" class="btn-primary">
-      <svg viewBox="0 0 16 16" aria-hidden="true" fill="currentColor" style="width:16px;height:16px"><path d="M8 3.5a.75.75 0 0 1 .53.22l5 5a.75.75 0 1 1-1.06 1.06L8 6.31 3.53 9.78a.75.75 0 1 1-1.06-1.06l5-5A.75.75 0 0 1 8 3.5Z" transform="rotate(-90 8 8)"/></svg>
-      Back to CommitSign
-    </a>
-  </section>
+  <ul class="nf-links">
+    <li><a href="/">Back to CommitSign</a></li>
+    <li><a href="https://hbenali.ovh" rel="noopener">hbenali.ovh</a></li>
+    <li><a href="https://github.com/hbenali/commit-signing-web" rel="noopener">Source on GitHub</a></li>
+  </ul>
+
+  <p class="nf-foot">Built by Houssem Ben Ali. Independent project — not affiliated with or endorsed by GitHub, Inc.</p>
 </main>
-
-<footer class="site">
-  <div class="foot-links">
-    <a href="/" rel="noopener">CommitSign</a>
-    <a href="https://hbenali.ovh" rel="noopener">hbenali.ovh</a>
-    <a href="https://github.com/hbenali/commit-signing-web" rel="noopener">Source on GitHub</a>
-  </div>
-  <p>Built by Houssem Ben Ali. Independent project — not affiliated with or endorsed by GitHub, Inc.</p>
-</footer>
-
-<script>
-(function () {
-  var root = document.documentElement;
-  var KEY = "commitsign-theme";
-  var toggle = document.getElementById("theme-toggle");
-  var label = document.getElementById("theme-label");
-  var iconSun = document.getElementById("icon-sun");
-  var iconMoon = document.getElementById("icon-moon");
-
-  function apply(theme) {
-    if (theme === "light" || theme === "dark") {
-      root.setAttribute("data-theme", theme);
-    } else {
-      root.removeAttribute("data-theme");
-    }
-    if (label) {
-      var effective = theme || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-      var word = effective === "dark" ? "Dark" : "Light";
-      label.textContent = word;
-      if (toggle) toggle.setAttribute("aria-label", "Theme: " + word + " (click to switch)");
-      if (iconSun) iconSun.style.display = effective === "light" ? "" : "none";
-      if (iconMoon) iconMoon.style.display = effective === "dark" ? "" : "none";
-    }
-  }
-
-  var saved = null;
-  try { saved = localStorage.getItem(KEY); } catch (e) {}
-  apply(saved);
-
-  if (toggle) {
-    toggle.addEventListener("click", function () {
-      var current = root.getAttribute("data-theme") ||
-        (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-      var next = current === "dark" ? "light" : "dark";
-      apply(next);
-      try { localStorage.setItem(KEY, next); } catch (e) {}
-    });
-  }
-
-  var path = decodeURIComponent(window.location.pathname) || "/";
-  var code = document.getElementById("pathCode");
-  if (code) code.textContent = path;
-})();
-</script>
 
 </body>
 </html>

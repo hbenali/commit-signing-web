@@ -6,9 +6,11 @@
 <title>CommitSign — set up Git commit signing in one command</title>
 <meta name="description" content="A copy-paste script that sets up SSH commit signing end to end: detects gh CLI, migrates you off GPG, generates a dedicated signing key, uploads it to GitHub, and verifies a real signed commit. Manual GPG and SSH guides included.">
 <link rel="canonical" href="https://commitsign.hbenali.ovh/">
-<meta name="theme-color" content="#0d1117">
+<meta name="theme-color" content="#0c1218">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.json">
+<link rel="preload" as="font" type="font/woff2" href="/fonts/big-shoulders-latin-wght.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/fonts/newsreader-latin-wght.woff2" crossorigin>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -16,7 +18,7 @@
 <link rel="apple-touch-icon" href="/icon-192.png">
 
 <!-- Security (static hosting: no custom HTTP headers, so CSP/referrer are set here; X-Frame-Options/X-Content-Type-Options need a real header and aren't achievable via meta) -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self' https://api.github.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'self' https://api.github.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 
 <meta property="og:type" content="website">
@@ -112,388 +114,34 @@
 }
 </script>
 
-<style>
-  :root {
-    --bg: #ffffff;
-    --bg-elevated: #f6f8fa;
-    --bg-inset: #eef1f4;
-    --border: #d0d7de;
-    --text: #1f2328;
-    --text-dim: #59636e;
-    --accent: #1a7f37;
-    --accent-contrast: #ffffff;
-    --link: #0969da;
-    --danger: #cf222e;
-    --warn: #9a6700;
-    --code-text: #1f2328;
-    --shadow: 0 1px 0 rgba(31,35,40,.04);
-    --radius: 10px;
-    --accent-badge: #116329;
-    --warn-badge: #7a5300;
-    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
-    --max: 880px;
-  }
-
-  :root:not([data-theme="light"]) {
-    @media (prefers-color-scheme: dark) {
-      --bg: #0d1117;
-      --bg-elevated: #161b22;
-      --bg-inset: #0a0d12;
-      --border: #30363d;
-      --text: #e6edf3;
-      --text-dim: #9198a1;
-      --accent: #3fb950;
-      --accent-contrast: #0d1117;
-      --link: #58a6ff;
-      --danger: #f85149;
-      --warn: #d29922;
-      --code-text: #e6edf3;
-      --shadow: 0 1px 0 rgba(0,0,0,.2);
-      --accent-badge: #3fb950;
-      --warn-badge: #d29922;
-    }
-  }
-
-  :root[data-theme="dark"] {
-    --bg: #0d1117;
-    --bg-elevated: #161b22;
-    --bg-inset: #0a0d12;
-    --border: #30363d;
-    --text: #e6edf3;
-    --text-dim: #9198a1;
-    --accent: #3fb950;
-    --accent-contrast: #0d1117;
-    --link: #58a6ff;
-    --danger: #f85149;
-    --warn: #d29922;
-    --code-text: #e6edf3;
-    --shadow: 0 1px 0 rgba(0,0,0,.2);
-    --accent-badge: #3fb950;
-    --warn-badge: #d29922;
-  }
-
-  * { box-sizing: border-box; }
-  html { color-scheme: light dark; }
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font-sans);
-    line-height: 1.55;
-    -webkit-font-smoothing: antialiased;
-  }
-  a {
-    color: var(--link); text-decoration: underline; text-underline-offset: 2px;
-    text-decoration-color: color-mix(in srgb, var(--link) 45%, transparent);
-  }
-  a:hover { text-decoration-color: var(--link); }
-  .brand, .icon-btn, footer.site .foot-links a { text-decoration: none; }
-  .skip-link {
-    position: absolute; left: -999px; top: 0;
-  }
-  .skip-link:focus {
-    left: 8px; top: 8px; z-index: 100;
-    background: var(--accent); color: var(--accent-contrast);
-    padding: .5rem 1rem; border-radius: var(--radius);
-  }
-
-  header.site {
-    position: sticky; top: 0; z-index: 20;
-    background: color-mix(in srgb, var(--bg) 88%, transparent);
-    backdrop-filter: saturate(140%) blur(8px);
-    border-bottom: 1px solid var(--border);
-  }
-  .nav {
-    max-width: var(--max); margin: 0 auto; padding: .9rem 1.25rem;
-    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-  }
-  .brand { display: flex; align-items: center; gap: .55rem; font-weight: 700; font-size: 1.05rem; color: var(--text); }
-  .brand svg { width: 24px; height: 24px; flex-shrink: 0; }
-  .nav-actions { display: flex; align-items: center; gap: .6rem; }
-  .icon-btn {
-    display: inline-flex; align-items: center; gap: .4rem;
-    background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text);
-    border-radius: 8px; padding: .45rem .7rem; font-size: .85rem; cursor: pointer;
-    font-family: inherit;
-  }
-  .icon-btn:hover { border-color: var(--accent); }
-  .icon-btn svg { width: 16px; height: 16px; }
-  .star-pill[hidden] { display: none; }
-  .star-pill {
-    display: inline-flex; align-items: center; gap: .25rem; margin-left: .1rem;
-    padding: .05rem .4rem; border-radius: 999px; background: var(--bg-inset); border: 1px solid var(--border);
-    font-size: .74rem; font-weight: 700; color: var(--warn);
-  }
-  .star-pill svg { width: 11px; height: 11px; }
-
-  main { max-width: var(--max); margin: 0 auto; padding: 0 1.25rem; }
-
-  .hero { padding: 3.2rem 0 1.6rem; text-align: center; }
-  .hero h1 { font-size: clamp(1.7rem, 4.2vw, 2.5rem); line-height: 1.15; margin: 0 0 .7rem; letter-spacing: -.01em; }
-  .hero p.lead { color: var(--text-dim); font-size: 1.05rem; max-width: 640px; margin: 0 auto 1.8rem; }
-  .badge-row { display: flex; justify-content: center; gap: .5rem; flex-wrap: wrap; margin-bottom: 1.6rem; }
-  .badge {
-    font-size: .75rem; font-weight: 600; padding: .25rem .6rem; border-radius: 999px;
-    background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-dim);
-  }
-
-  .badge-demo { display: flex; flex-direction: column; align-items: center; gap: .5rem; max-width: 400px; margin: 0 auto 2rem; }
-  .commit-row {
-    display: flex; align-items: center; gap: .6rem; width: 100%;
-    background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius);
-    padding: .6rem .9rem; font-size: .85rem;
-  }
-  .commit-avatar {
-    width: 22px; height: 22px; border-radius: 999px; flex-shrink: 0;
-    background: linear-gradient(135deg, var(--accent), var(--link)); opacity: .5;
-  }
-  .commit-msg {
-    flex: 1; text-align: left; color: var(--text); font-weight: 500;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  }
-  .commit-hash {
-    font-family: var(--font-mono); font-size: .76rem; color: var(--text-dim); flex-shrink: 0;
-    background: var(--bg-inset); border: 1px solid var(--border); border-radius: 5px; padding: .05rem .4rem;
-  }
-  .gh-badge {
-    display: inline-flex; align-items: center; gap: .25rem; flex-shrink: 0;
-    font-size: .72rem; font-weight: 600; padding: .1rem .5rem; border-radius: 999px; border: 1px solid;
-  }
-  .gh-badge svg { width: 12px; height: 12px; }
-  .gh-badge.unverified { background: var(--bg-inset); border-color: var(--border); color: var(--text-dim); }
-  .gh-badge.verified {
-    background: color-mix(in srgb, var(--accent) 15%, transparent);
-    border-color: color-mix(in srgb, var(--accent) 40%, transparent); color: var(--accent-badge);
-  }
-  .badge-demo-arrow { font-size: .78rem; color: var(--text-dim); font-weight: 600; }
-
-  .tabbar { display: inline-flex; gap: .25rem; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; padding: 3px; margin-bottom: .9rem; }
-  .tabbar label {
-    padding: .4rem .9rem; border-radius: 8px; font-size: .85rem; font-weight: 600; cursor: pointer;
-    color: var(--text-dim); user-select: none;
-  }
-  input.tab-radio { position: absolute; opacity: 0; pointer-events: none; }
-  .tab-radio:checked + label { background: var(--bg); color: var(--text); box-shadow: var(--shadow); }
-  .tab-radio:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .tab-panel { display: none; }
-
-  #os-sh:checked ~ .os-panels #panel-sh,
-  #os-win:checked ~ .os-panels #panel-win,
-  #man-ssh:checked ~ .man-panels #panel-ssh-manual,
-  #man-gpg:checked ~ .man-panels #panel-gpg-manual { display: block; }
-
-  #sshos-sh:checked ~ .steps [data-os="sh"],
-  #sshos-win:checked ~ .steps [data-os="win"] { display: block; }
-
-  .codeblock {
-    position: relative; background: var(--bg-inset); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 1rem 3.2rem 1rem 1.1rem; text-align: left;
-    overflow-x: auto; margin: 0 0 .9rem;
-  }
-  .codeblock code {
-    font-family: var(--font-mono); font-size: .82rem; color: var(--code-text);
-    white-space: pre; display: block;
-  }
-  .copy-btn {
-    position: absolute; top: .55rem; right: .55rem;
-    background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-dim);
-    border-radius: 6px; padding: .3rem .55rem; font-size: .72rem; cursor: pointer; font-family: inherit;
-  }
-  .copy-btn:hover { color: var(--text); border-color: var(--accent); }
-  .copy-btn[data-copied="true"] { color: var(--accent); border-color: var(--accent); }
-
-  .hint { font-size: .82rem; color: var(--text-dim); max-width: 560px; margin: 0 auto; text-align: center; }
-
-  section { padding: 2.4rem 0; border-top: 1px solid var(--border); }
-  section > h2 { font-size: 1.5rem; margin: 0 0 .35rem; letter-spacing: -.01em; }
-  section > p.section-lead { color: var(--text-dim); margin: 0 0 1.6rem; max-width: 620px; }
-
-  .grid6 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
-  .card {
-    background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 1.1rem 1.2rem;
-  }
-  .card .step-no {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 22px; height: 22px; border-radius: 999px; background: var(--accent); color: var(--accent-contrast);
-    font-size: .72rem; font-weight: 700; margin-bottom: .55rem;
-  }
-  .card h3 { margin: 0 0 .3rem; font-size: 1rem; }
-  .card p { margin: 0; color: var(--text-dim); font-size: .88rem; }
-
-  .steps { margin: 0; padding: 0; list-style: none; counter-reset: step; }
-  .steps > li {
-    counter-increment: step; position: relative; padding-left: 2.4rem; margin-bottom: 1.2rem;
-  }
-  .steps > li::before {
-    content: counter(step); position: absolute; left: 0; top: 0;
-    width: 1.7rem; height: 1.7rem; border-radius: 999px; background: var(--bg-inset);
-    border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
-    font-size: .8rem; font-weight: 700; color: var(--text-dim);
-  }
-  .steps > li > strong { display: block; margin-bottom: .35rem; }
-  .steps > li p { margin: 0 0 .5rem; color: var(--text-dim); font-size: .9rem; }
-  .steps .codeblock { margin-bottom: .3rem; }
-
-  .callout {
-    border: 1px solid var(--border); border-left: 3px solid var(--accent);
-    background: var(--bg-elevated); border-radius: var(--radius); padding: 1rem 1.2rem; margin-top: 1rem;
-  }
-  .callout h3 { margin: 0 0 .4rem; font-size: .95rem; }
-  .callout ul { margin: 0; padding-left: 1.1rem; font-size: .88rem; color: var(--text-dim); }
-  .callout li { margin-bottom: .3rem; }
-
-  .term-window { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; text-align: left; }
-  .term-bar {
-    display: flex; align-items: center; gap: .4rem; padding: .55rem .8rem;
-    background: var(--bg-elevated); border-bottom: 1px solid var(--border);
-  }
-  .term-dot { width: 10px; height: 10px; border-radius: 999px; flex-shrink: 0; }
-  .term-dot.red { background: #ff5f56; }
-  .term-dot.yellow { background: #ffbd2e; }
-  .term-dot.green { background: #27c93f; }
-  .term-title { margin-left: .5rem; font-size: .78rem; color: var(--text-dim); font-family: var(--font-mono); }
-  .term-body {
-    margin: 0; padding: 1rem 1.1rem; background: var(--bg-inset);
-    font-family: var(--font-mono); font-size: .82rem; color: var(--code-text);
-    overflow-x: auto; line-height: 1.9; white-space: pre;
-  }
-  .term-hash { color: var(--warn-badge); font-weight: 600; }
-
-  details.faq {
-    border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-elevated);
-    padding: .8rem 1rem; margin-bottom: .6rem;
-  }
-  details.faq summary {
-    cursor: pointer; font-weight: 600; font-size: .95rem;
-    list-style: none; position: relative; padding-right: 1.5rem;
-  }
-  details.faq summary::-webkit-details-marker { display: none; }
-  details.faq summary::after {
-    content: ""; position: absolute; right: .1rem; top: 50%; width: 8px; height: 8px;
-    border-right: 2px solid var(--text-dim); border-bottom: 2px solid var(--text-dim);
-    transform: translateY(-65%) rotate(45deg); transition: transform .15s ease;
-  }
-  details.faq[open] summary::after { transform: translateY(-35%) rotate(225deg); }
-  details.faq p { color: var(--text-dim); font-size: .9rem; margin: .6rem 0 0; }
-
-  .verify-form { display: flex; gap: .55rem; max-width: 420px; }
-  .verify-form input {
-    flex: 1; font-family: inherit; font-size: .9rem; padding: .55rem .8rem;
-    border: 1px solid var(--border); border-radius: 8px; background: var(--bg-inset); color: var(--text);
-  }
-  .verify-form input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-  .verify-form .icon-btn { cursor: pointer; }
-  #verify-results { margin-top: 1.4rem; }
-  .verify-hint { color: var(--text-dim); font-size: .88rem; }
-  .verify-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
-  .verify-card {
-    background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.15rem;
-  }
-  .verify-card h4 { margin: 0 0 .6rem; font-size: .95rem; display: flex; align-items: center; gap: .5rem; }
-  .verify-card .count-badge {
-    background: var(--bg-inset); border: 1px solid var(--border); border-radius: 999px;
-    font-size: .72rem; font-weight: 700; padding: .1rem .55rem; color: var(--text-dim);
-  }
-  .verify-card ul { list-style: none; margin: 0; padding: 0; }
-  .verify-card li { border-top: 1px solid var(--border); padding: .55rem 0; font-size: .84rem; }
-  .verify-card li:first-child { border-top: none; padding-top: 0; }
-  .verify-card li code { font-family: var(--font-mono); font-size: .78rem; word-break: break-all; }
-  .verify-card .key-meta { color: var(--text-dim); font-size: .78rem; margin-top: .15rem; }
-  .verify-badge {
-    display: inline-block; font-size: .68rem; font-weight: 700; border-radius: 5px; padding: .05rem .4rem; margin-left: .3rem;
-  }
-  .verify-badge.ok { background: color-mix(in srgb, var(--accent) 18%, transparent); color: var(--accent); }
-  .verify-badge.warn { background: color-mix(in srgb, var(--warn) 20%, transparent); color: var(--warn); }
-  .verify-badge.danger { background: color-mix(in srgb, var(--danger) 20%, transparent); color: var(--danger); }
-
-  footer.site {
-    border-top: 1px solid var(--border); padding: 2rem 0 3rem; text-align: center;
-    color: var(--text-dim); font-size: .85rem;
-  }
-  footer.site a { color: var(--text-dim); }
-  footer.site .foot-links { display: flex; justify-content: center; gap: 1.2rem; margin-bottom: .7rem; flex-wrap: wrap; }
-
-  .scroll-top-btn {
-    position: fixed; right: 1.25rem; bottom: 1.25rem; z-index: 30;
-    width: 42px; height: 42px; border-radius: 999px;
-    background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text);
-    display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0;
-    opacity: 0; transform: translateY(8px); pointer-events: none;
-    transition: opacity .2s ease, transform .2s ease, border-color .2s ease;
-    box-shadow: 0 2px 10px rgba(0,0,0,.18);
-  }
-  .scroll-top-btn.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
-  .scroll-top-btn:hover { border-color: var(--accent); }
-  .scroll-top-btn svg { width: 18px; height: 18px; }
-  @media (prefers-reduced-motion: reduce) {
-    .scroll-top-btn { transition: opacity .01s linear; }
-  }
-
-  code.inline {
-    font-family: var(--font-mono); background: var(--bg-inset); border: 1px solid var(--border);
-    border-radius: 5px; padding: .1rem .35rem; font-size: .87em;
-  }
-
-  @media (max-width: 640px) {
-    .hero { padding: 2.2rem 0 1.2rem; }
-    section { padding: 1.8rem 0; }
-  }
-</style>
+<link rel="stylesheet" href="/site.css">
+<script src="/app.js" defer></script>
 </head>
 <body>
-<a class="skip-link" href="#main">Skip to content</a>
+<a class="skip" href="#main">Skip to content</a>
 
-<header class="site">
-  <div class="nav">
-    <span class="brand">
-      <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="var(--bg-elevated)" stroke="var(--border)" stroke-width="1"/><path d="M40 14a12 12 0 1 0 4.24 23.24L47 40l3-3 3 3 4-4-3-3 3-3-4-4-3 3-2.76-2.76A12 12 0 0 0 40 14Zm0 6a6 6 0 1 1 0 12 6 6 0 0 1 0-12Z" fill="var(--accent)"/></svg>
-      commitsign
-    </span>
-    <div class="nav-actions">
-      <a class="icon-btn" href="https://github.com/hbenali/commit-signing-web" rel="noopener" title="Like it? Star the repo!">
-        <svg viewBox="0 0 16 16" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
-        GitHub
-        <span class="star-pill" id="star-count" hidden><svg viewBox="0 0 16 16" aria-hidden="true" fill="currentColor"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg><span id="star-count-num"></span></span>
-      </a>
-      <button class="icon-btn" id="theme-toggle" type="button">
-        <svg id="icon-sun" viewBox="0 0 16 16" aria-hidden="true" fill="currentColor" style="display:none"><path d="M8 1a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 8 1Zm0 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm7-4a.75.75 0 0 1 0 1.5h-1.5a.75.75 0 0 1 0-1.5H15ZM2.5 8a.75.75 0 0 1-.75.75H.25a.75.75 0 0 1 0-1.5h1.5A.75.75 0 0 1 2.5 8Zm10.65-5.15a.75.75 0 0 1 0 1.06l-1.06 1.06a.75.75 0 1 1-1.06-1.06l1.06-1.06a.75.75 0 0 1 1.06 0ZM4.97 11.03a.75.75 0 0 1 0 1.06l-1.06 1.06a.75.75 0 1 1-1.06-1.06l1.06-1.06a.75.75 0 0 1 1.06 0ZM8 13.75a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5a.75.75 0 0 1 .75-.75Zm4.94-1.66a.75.75 0 0 1 1.06 1.06l-1.06 1.06a.75.75 0 1 1-1.06-1.06l1.06-1.06ZM3.91 3.91a.75.75 0 0 1 1.06 0l1.06 1.06a.75.75 0 1 1-1.06 1.06L3.91 4.97a.75.75 0 0 1 0-1.06Z"/></svg>
-        <svg id="icon-moon" viewBox="0 0 16 16" aria-hidden="true" fill="currentColor" style="display:none"><path d="M9.598 1.591a.75.75 0 0 1 .785-.128 7 7 0 1 1-8.874 8.875.75.75 0 0 1 .656-1.03 5.5 5.5 0 0 0 7.271-7.27.75.75 0 0 1 .162-.447Zm1.196 1.653a7 7 0 0 1-8.51 8.509 5.5 5.5 0 0 0 8.51-8.51Z"/></svg>
-        <span id="theme-label">Theme</span>
-      </button>
+<header class="bar">
+  <div class="bar-inner">
+    <a class="mark" href="/"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M40 14a12 12 0 1 0 4.24 23.24L47 40l3-3 3 3 4-4-3-3 3-3-4-4-3 3-2.76-2.76A12 12 0 0 0 40 14Zm0 6a6 6 0 1 1 0 12 6 6 0 0 1 0-12Z"/><path opacity=".55" d="M18 30a4 4 0 1 0 0 8h1v4h4v-4h1v-4h-1a4 4 0 0 0-5-4Z"/></svg>commitsign</a>
+    <div class="bar-end">
+      <a href="https://github.com/hbenali/commit-signing-web" rel="noopener" title="Like it? Star the repo!">GitHub</a>
+      <span class="star-pill" id="star-count" hidden><span id="star-count-num"></span> stars</span>
     </div>
   </div>
 </header>
 
 <main id="main">
 
-  <section class="hero" style="border-top:none;">
-    <div class="badge-row">
-      <span class="badge">bash + batch</span>
-      <span class="badge">no dependencies</span>
-      <span class="badge">MIT licensed</span>
-    </div>
-    <h1>Sign every commit.<br>No more "Unverified" badges.</h1>
+  <section class="hero wrap">
+    <h1 class="display"><span class="line"><span>Sign every commit.</span></span><span class="line"><span>No more "Unverified" badges.</span></span></h1>
     <p class="lead">One script sets up SSH commit signing end to end — detects the GitHub CLI, offers to migrate you off GPG, generates a key dedicated only to signing, uploads it to GitHub, and proves it works with a real signed test commit before it's done.</p>
+    <ul class="facts">
+      <li>bash + batch</li>
+      <li>no dependencies</li>
+      <li>MIT licensed</li>
+    </ul>
 
-    <div class="badge-demo" aria-hidden="true">
-      <div class="commit-row">
-        <span class="commit-avatar"></span>
-        <span class="commit-msg">Fix login bug</span>
-        <span class="gh-badge unverified"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14Zm0 1.5a8.5 8.5 0 1 1 0-17 8.5 8.5 0 0 1 0 17ZM6.92 6.085h.001a.75.75 0 0 1 .154-.845l.008-.008a1.107 1.107 0 0 1 1.416-.007c.406.339.406.94 0 1.279l-.706.588a1.75 1.75 0 0 0-.625 1.333v.128a.75.75 0 0 0 1.5 0v-.078a.25.25 0 0 1 .09-.192l.706-.588c1.011-.844 1.011-2.518 0-3.362a2.607 2.607 0 0 0-3.334.017 2.25 2.25 0 0 0-.464 2.536.75.75 0 1 0 1.354-.65Zm.164 4.665a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Z"/></svg>Unverified</span>
-        <code class="commit-hash">a1b2c3d</code>
-      </div>
-      <div class="badge-demo-arrow">↓ run the script ↓</div>
-      <div class="commit-row">
-        <span class="commit-avatar"></span>
-        <span class="commit-msg">Fix login bug</span>
-        <span class="gh-badge verified"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 16A8 8 0 1 1 8 0a8 8 0 0 1 0 16Zm3.78-9.72a.75.75 0 0 0-1.06-1.06L6.75 9.19 5.28 7.72a.75.75 0 0 0-1.06 1.06l2 2a.75.75 0 0 0 1.06 0l4.5-4.5Z"/></svg>Verified</span>
-        <code class="commit-hash">a1b2c3d</code>
-      </div>
-    </div>
-    <p class="hint" style="margin-top:-1rem;">Illustrative mockup of GitHub's commit UI, not a real screenshot — this independent tool isn't affiliated with GitHub, Inc.</p>
-
+    <div class="install">
     <input class="tab-radio" type="radio" name="os" id="os-sh" checked>
     <input class="tab-radio" type="radio" name="os" id="os-win">
     <div class="tabbar">
@@ -507,9 +155,9 @@
           <code>curl -fsSL https://raw.githubusercontent.com/hbenali/commit-signing-web/main/scripts/git-ssh-signing-setup.sh -o git-ssh-signing-setup.sh &amp;&amp; chmod +x git-ssh-signing-setup.sh &amp;&amp; ./git-ssh-signing-setup.sh</code>
           <button class="copy-btn" type="button" data-copy-target="panel-sh">Copy</button>
         </div>
-        <details class="faq" style="text-align:left;">
+        <details class="faq in-panel">
           <summary><code class="inline">curl</code> not installed? Here's the <code class="inline">wget</code> command</summary>
-          <div class="codeblock" id="panel-sh-wget" style="margin-top:.6rem;">
+          <div class="codeblock" id="panel-sh-wget">
             <code>wget -q https://raw.githubusercontent.com/hbenali/commit-signing-web/main/scripts/git-ssh-signing-setup.sh -O git-ssh-signing-setup.sh &amp;&amp; chmod +x git-ssh-signing-setup.sh &amp;&amp; ./git-ssh-signing-setup.sh</code>
             <button class="copy-btn" type="button" data-copy-target="panel-sh-wget">Copy</button>
           </div>
@@ -524,71 +172,81 @@
     </div>
 
     <p class="hint">Downloads first, then runs — the script is interactive and asks before changing anything, so we never pipe it straight into a shell. <a href="https://github.com/hbenali/commit-signing-web/blob/main/scripts/git-ssh-signing-setup.sh" rel="noopener">Read the source</a> before you run it.</p>
+    </div>
+    <div class="mock" aria-hidden="true">
+      <div class="mock-row">
+        <span class="mock-msg">Fix login bug</span>
+        <span class="mock-state unverified"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/></svg>Unverified</span>
+        <code class="mock-hash">a1b2c3d</code>
+      </div>
+      <p class="mock-step">run the script</p>
+      <div class="mock-row">
+        <span class="mock-msg">Fix login bug</span>
+        <span class="mock-state verified"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M5.2 8.2l2 2 3.6-4"/></svg>Verified</span>
+        <code class="mock-hash">a1b2c3d</code>
+      </div>
+    </div>
+    <p class="hint">Illustrative mockup of GitHub's commit UI, not a real screenshot — this independent tool isn't affiliated with GitHub, Inc.</p>
   </section>
 
-  <section id="prerequisites">
-    <h2>Before you run it</h2>
-    <p class="section-lead">Four tools, and you likely already have most of them.</p>
-    <div class="grid6">
-      <div class="card">
+  <section class="block wrap" id="prerequisites">
+    <div class="block-head"><div>
+      <h2 class="display block-title">Before you run it</h2>
+      <p class="block-note">Four tools, and you likely already have most of them.</p>
+    </div></div>
+    <div class="block-body">
+    <ul class="rows">
+      <li>
         <h3><code class="inline">curl</code> or <code class="inline">wget</code></h3>
-        <p>To fetch the script itself. Most distros ship one, but minimal images (some containers, server installs) may have neither — install with your distro's package manager, e.g. <code class="inline">sudo apt install curl</code> / <code class="inline">sudo dnf install curl</code>.</p>
-      </div>
-      <div class="card">
+        <p>To fetch the script itself. Most distros ship one, but minimal images (some containers, server installs) may have neither — install with your distro's package manager, e.g. <code class="inline">sudo apt install curl</code> / <code class="inline">sudo dnf install curl</code>.</p></li>
+      <li>
         <h3>Git 2.34+</h3>
-        <p>Required for SSH commit signing support. <a href="https://git-scm.com/downloads" rel="noopener">git-scm.com/downloads</a></p>
-      </div>
-      <div class="card">
+        <p>Required for SSH commit signing support. <a href="https://git-scm.com/downloads" rel="noopener">git-scm.com/downloads</a></p></li>
+      <li>
         <h3>OpenSSH (<code class="inline">ssh-keygen</code>)</h3>
-        <p>Built into macOS, Linux, and Windows 10+. If missing on Windows: <a href="https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse" rel="noopener">enable the OpenSSH Client feature</a> — Git for Windows also bundles it.</p>
-      </div>
-      <div class="card">
+        <p>Built into macOS, Linux, and Windows 10+. If missing on Windows: <a href="https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse" rel="noopener">enable the OpenSSH Client feature</a> — Git for Windows also bundles it.</p></li>
+      <li>
         <h3>GitHub CLI (<code class="inline">gh</code>)</h3>
-        <p>Optional but recommended — automates the upload step. <a href="https://cli.github.com" rel="noopener">cli.github.com</a>. Without it, the script prints manual copy-paste steps instead.</p>
-      </div>
+        <p>Optional but recommended — automates the upload step. <a href="https://cli.github.com" rel="noopener">cli.github.com</a>. Without it, the script prints manual copy-paste steps instead.</p></li>
+    </ul>
     </div>
   </section>
 
-  <section id="what-it-does">
-    <h2>What it sets up</h2>
-    <p class="section-lead">Six steps, each with checks and confirmations along the way — nothing happens without you seeing it first.</p>
-    <div class="grid6">
-      <div class="card">
-        <span class="step-no">1</span>
+  <section class="block wrap" id="what-it-does">
+    <div class="block-head"><div>
+      <h2 class="display block-title">What it sets up</h2>
+      <p class="block-note">Six steps, each with checks and confirmations along the way — nothing happens without you seeing it first.</p>
+    </div></div>
+    <div class="block-body">
+    <ol class="rows">
+      <li>
         <h3>Pre-flight checks</h3>
-        <p>Verifies git ≥ 2.34, <code class="inline">ssh-keygen</code>, and the GitHub CLI before touching anything.</p>
-      </div>
-      <div class="card">
-        <span class="step-no">2</span>
+        <p>Verifies git ≥ 2.34, <code class="inline">ssh-keygen</code>, and the GitHub CLI before touching anything.</p></li>
+      <li>
         <h3>GPG migration</h3>
-        <p>Detects an existing GPG signing setup and offers to back it up and switch to SSH, or leave it alone.</p>
-      </div>
-      <div class="card">
-        <span class="step-no">3</span>
+        <p>Detects an existing GPG signing setup and offers to back it up and switch to SSH, or leave it alone.</p></li>
+      <li>
         <h3>Dedicated signing key</h3>
-        <p>Generates — or lets you pick — a key used only for signing, never for push/pull authentication.</p>
-      </div>
-      <div class="card">
-        <span class="step-no">4</span>
+        <p>Generates — or lets you pick — a key used only for signing, never for push/pull authentication.</p></li>
+      <li>
         <h3>Upload via <code class="inline">gh</code></h3>
-        <p>Uploads the key as a Signing Key, auto-recovers from a missing <code class="inline">admin:ssh_signing_key</code> scope, and warns before reusing it for Git auth.</p>
-      </div>
-      <div class="card">
-        <span class="step-no">5</span>
+        <p>Uploads the key as a Signing Key, auto-recovers from a missing <code class="inline">admin:ssh_signing_key</code> scope, and warns before reusing it for Git auth.</p></li>
+      <li>
         <h3>Commit &amp; tag signing</h3>
-        <p>Sets <code class="inline">gpg.format=ssh</code> and your signing key, then asks separately about commit vs. tag signing.</p>
-      </div>
-      <div class="card">
-        <span class="step-no">6</span>
+        <p>Sets <code class="inline">gpg.format=ssh</code> and your signing key, then asks separately about commit vs. tag signing.</p></li>
+      <li>
         <h3>Real verification</h3>
-        <p>Makes an actual signed test commit and checks <code class="inline">git log --show-signature</code> reports "Good" before declaring success.</p>
-      </div>
+        <p>Makes an actual signed test commit and checks <code class="inline">git log --show-signature</code> reports "Good" before declaring success.</p></li>
+    </ol>
     </div>
   </section>
 
-  <section id="manual">
-    <h2>Prefer to do it by hand?</h2>
-    <p class="section-lead">Same result, no script — pick your signing method.</p>
+  <section class="block wrap" id="manual">
+    <div class="block-head"><div>
+      <h2 class="display block-title">Prefer to do it by hand?</h2>
+      <p class="block-note">Same result, no script — pick your signing method.</p>
+    </div></div>
+    <div class="block-body">
 
     <input class="tab-radio" type="radio" name="man" id="man-ssh" checked>
     <input class="tab-radio" type="radio" name="man" id="man-gpg">
@@ -719,28 +377,38 @@ git config --global commit.gpgsign true</code>
           </li>
         </ol>
 
-        <div class="callout">
+        <div class="note panel-note">
           <h3>GPG still works fine</h3>
-          <p style="margin:0;color:var(--text-dim);font-size:.88rem;">It's just more machinery — a separate keyring and passphrase-agent setup — for a result SSH signing gets from a key format you probably already have. If you've already got a GPG setup, the script detects it and offers to migrate you to SSH instead of fighting it.</p>
-          <p style="margin:.6rem 0 0;color:var(--text-dim);font-size:.88rem;">The commands above are identical on Windows — install <a href="https://gpg4win.org" rel="noopener">Gpg4win</a> first, then run them as-is in <code class="inline">cmd</code> or PowerShell.</p>
+          <p>It's just more machinery — a separate keyring and passphrase-agent setup — for a result SSH signing gets from a key format you probably already have. If you've already got a GPG setup, the script detects it and offers to migrate you to SSH instead of fighting it.</p>
+          <p>The commands above are identical on Windows — install <a href="https://gpg4win.org" rel="noopener">Gpg4win</a> first, then run them as-is in <code class="inline">cmd</code> or PowerShell.</p>
         </div>
       </div>
     </div>
+</div>
   </section>
 
-  <section id="verify">
-    <h2>Check a GitHub account</h2>
-    <p class="section-lead">Look up any public GitHub username's registered signing keys — SSH and GPG — straight from GitHub's public API. Nothing is sent anywhere but github.com; this runs entirely in your browser.</p>
+  <section class="block wrap" id="verify">
+    <div class="block-head"><div>
+      <h2 class="display block-title">Check a GitHub account</h2>
+      <p class="block-note">Look up any public GitHub username's registered signing keys — SSH and GPG — straight from GitHub's public API. Nothing is sent anywhere but github.com; this runs entirely in your browser.</p>
+    </div></div>
+    <div class="block-body">
     <form id="verify-form" class="verify-form">
-      <input type="text" id="verify-username" name="username" placeholder="GitHub username" autocomplete="off" autocapitalize="off" spellcheck="false" required aria-label="GitHub username">
-      <button type="submit" class="icon-btn">Check</button>
+      <label for="verify-username">GitHub username</label>
+      <div class="verify-row">
+        <input type="text" id="verify-username" name="username" placeholder="GitHub username" autocomplete="off" autocapitalize="off" spellcheck="false" required>
+        <button type="submit">Check</button>
+      </div>
     </form>
     <div id="verify-results" aria-live="polite"></div>
+</div>
   </section>
 
-  <section id="why">
-    <h2>A few things worth knowing</h2>
-    <div class="callout">
+  <section class="block wrap" id="why">
+    <div class="block-head"><div>
+      <h2 class="display block-title">A few things worth knowing</h2>
+    </div></div>
+    <div class="block-body"><div class="note">
       <h3>Don't reuse your signing key for push authentication</h3>
       <ul>
         <li>A key used for both loses independence — rotating or revoking one breaks the other.</li>
@@ -748,15 +416,18 @@ git config --global commit.gpgsign true</code>
         <li>If <code class="inline">gh</code> has more than one account logged in, double-check which one you're uploading the signing key to.</li>
       </ul>
     </div>
-    <div class="callout">
+    <div class="note">
       <h3>Signing key ≠ authentication key on GitHub</h3>
-      <p style="margin:0;color:var(--text-dim);font-size:.88rem;">GitHub tracks these as two separate key types under <a href="https://github.com/settings/keys" rel="noopener">Settings → SSH and GPG keys</a>. Adding a key as an Authentication key does <em>not</em> make it usable for signing, and vice versa — that's by design.</p>
+      <p>GitHub tracks these as two separate key types under <a href="https://github.com/settings/keys" rel="noopener">Settings → SSH and GPG keys</a>. Adding a key as an Authentication key does <em>not</em> make it usable for signing, and vice versa — that's by design.</p>
     </div>
+</div>
   </section>
 
-  <section id="faq">
-    <h2>FAQ</h2>
-    <details class="faq">
+  <section class="block wrap" id="faq">
+    <div class="block-head"><div>
+      <h2 class="display block-title">FAQ</h2>
+    </div></div>
+    <div class="block-body faq-list"><details class="faq">
       <summary>New to Git entirely?</summary>
       <p>This site assumes you already use Git day to day. If you don't yet: install it, then set your identity once with <code class="inline">git config --global user.name "Your Name"</code> and <code class="inline">git config --global user.email "you@example.com"</code>. The everyday loop is <code class="inline">git add</code> (stage changes), <code class="inline">git commit -m "message"</code> (save them), and <code class="inline">git push</code> (send them to a remote like GitHub). The <a href="https://git-scm.com/doc" rel="noopener">official Git documentation</a> — especially the free <a href="https://git-scm.com/book/en/v2" rel="noopener">Pro Git book</a> — is the best place to actually learn it properly; come back here once commit and push feel routine.</p>
     </details>
@@ -785,17 +456,18 @@ git config --global commit.gpgsign true</code>
       <summary>Does this work with GitLab or Gitea instead of GitHub?</summary>
       <p>Commit signing itself — SSH or GPG — is a git feature, not a GitHub one: it happens entirely on your machine and doesn't care which remote you push to. Only the "upload your key" step differs. The script's <code class="inline">gh</code> integration is GitHub-specific, so on GitLab or Gitea it'll fall back to manual instructions — add the same public key yourself under GitLab's <a href="https://gitlab.com/-/user_settings/ssh_keys" rel="noopener">SSH Keys</a> settings (set usage type to "Signing") or <a href="https://gitlab.com/-/profile/gpg_keys" rel="noopener">GPG Keys</a>, or your Gitea instance's Settings → SSH/GPG Keys page. Everything else — the dedicated key, git config, and verification steps — is identical.</p>
     </details>
+</div>
   </section>
 
-  <section id="changelog">
-    <h2>Recently added</h2>
-    <p class="section-lead">Actively maintained — this is the actual commit history, not a curated highlight reel.</p>
-    <div class="term-window">
-      <div class="term-bar">
-        <span class="term-dot red"></span><span class="term-dot yellow"></span><span class="term-dot green"></span>
-        <span class="term-title">git log --oneline</span>
-      </div>
-      <pre class="term-body"><code><span class="term-hash">63582bb</span> Add Open Graph image and recently-added changelog section
+  <section class="block wrap" id="changelog">
+    <div class="block-head"><div>
+      <h2 class="display block-title">Recently added</h2>
+      <p class="block-note">Actively maintained — this is the actual commit history, not a curated highlight reel.</p>
+    </div></div>
+    <div class="block-body">
+    <div class="log">
+      <p class="log-title">git log --oneline</p>
+      <pre><code><span class="term-hash">63582bb</span> Add Open Graph image and recently-added changelog section
 <span class="term-hash">e1d0048</span> Add Unverified/Verified badge visual to hero
 <span class="term-hash">c00801c</span> Bump GitHub Actions to latest major versions
 <span class="term-hash">a291aaf</span> Fix accessibility issues (Lighthouse 100), add FAQ structured data, GitHub star count
@@ -803,249 +475,28 @@ git config --global commit.gpgsign true</code>
 <span class="term-hash">1aae731</span> Support dnf/yum/pacman/zypper/apk in install hints, fix openssh package name
 <span class="term-hash">68420ea</span> Initial commit: signing setup scripts + doc site</code></pre>
     </div>
-    <p class="hint" style="margin-top:.9rem;"><span class="gh-badge verified"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 16A8 8 0 1 1 8 0a8 8 0 0 1 0 16Zm3.78-9.72a.75.75 0 0 0-1.06-1.06L6.75 9.19 5.28 7.72a.75.75 0 0 0-1.06 1.06l2 2a.75.75 0 0 0 1.06 0l4.5-4.5Z"/></svg>Verified</span> — every commit above is genuinely SSH-signed, not just an example.</p>
+    <p class="hint"><span class="verified-word">Verified</span> — every commit above is genuinely SSH-signed, not just an example.</p>
+</div>
   </section>
 
 </main>
 
-<footer class="site">
-  <div class="foot-links">
-    <a href="https://hbenali.ovh" rel="noopener">hbenali.ovh</a>
-    <a href="https://github.com/hbenali/commit-signing-web" rel="noopener">Source on GitHub</a>
-    <a href="https://github.com/hbenali/commit-signing-web/blob/main/LICENSE" rel="noopener">MIT License</a>
-    <a href="https://github.com/settings/keys" rel="noopener">GitHub SSH/GPG keys</a>
+<footer class="foot">
+  <div>
+    <div class="foot-links">
+      <a href="https://hbenali.ovh" rel="noopener">hbenali.ovh</a>
+      <a href="https://github.com/hbenali/commit-signing-web" rel="noopener">Source on GitHub</a>
+      <a href="https://github.com/hbenali/commit-signing-web/blob/main/LICENSE" rel="noopener">MIT License</a>
+      <a href="https://github.com/settings/keys" rel="noopener">GitHub SSH/GPG keys</a>
+    </div>
+    <p>Built by Houssem Ben Ali — Git enthusiast (some call it Guru status) since 2012,<br>with the aliases, rebases, and hard-earned signing-key lessons to prove it.<br>Source available — read the script before you run it.</p>
+    <p>Independent project, not affiliated with or endorsed by GitHub, Inc. "Verified"/"Unverified" badges above are illustrations of GitHub's own commit UI, shown for context only.</p>
   </div>
-  <p>Built by Houssem Ben Ali — Git enthusiast (some call it Guru status) since 2012,<br>with the aliases, rebases, and hard-earned signing-key lessons to prove it.<br>Source available — read the script before you run it.</p>
-  <p style="margin-top:.6rem;font-size:.78rem;">Independent project, not affiliated with or endorsed by GitHub, Inc. "Verified"/"Unverified" badges above are illustrations of GitHub's own commit UI, shown for context only.</p>
 </footer>
 
 <button id="scroll-top-btn" class="scroll-top-btn" type="button" aria-label="Back to top">
   <svg viewBox="0 0 16 16" aria-hidden="true" fill="currentColor"><path d="M8 3.5a.75.75 0 0 1 .53.22l5 5a.75.75 0 1 1-1.06 1.06L8 6.31 3.53 9.78a.75.75 0 1 1-1.06-1.06l5-5A.75.75 0 0 1 8 3.5Z"/></svg>
 </button>
 
-<script>
-(function () {
-  "use strict";
-
-  // Pre-select the Windows tab for Windows visitors; everyone else keeps
-  // the macOS/Linux default. Best-effort — falls back silently if the
-  // platform can't be determined.
-  try {
-    var isWindows = /Win/i.test(navigator.platform || navigator.userAgent || "");
-    if (isWindows) {
-      ["os-win", "sshos-win"].forEach(function (id) {
-        var el = document.getElementById(id);
-        if (el) el.checked = true;
-      });
-    }
-  } catch (e) {}
-
-  var root = document.documentElement;
-  var KEY = "commitsign-theme";
-  var toggle = document.getElementById("theme-toggle");
-  var label = document.getElementById("theme-label");
-  var iconSun = document.getElementById("icon-sun");
-  var iconMoon = document.getElementById("icon-moon");
-
-  function apply(theme) {
-    if (theme === "light" || theme === "dark") {
-      root.setAttribute("data-theme", theme);
-    } else {
-      root.removeAttribute("data-theme");
-    }
-    if (label) {
-      var effective = theme || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-      var word = effective === "dark" ? "Dark" : "Light";
-      label.textContent = word;
-      if (toggle) toggle.setAttribute("aria-label", "Theme: " + word + " (click to switch)");
-      if (iconSun) iconSun.style.display = effective === "light" ? "" : "none";
-      if (iconMoon) iconMoon.style.display = effective === "dark" ? "" : "none";
-    }
-  }
-
-  var saved = null;
-  try { saved = localStorage.getItem(KEY); } catch (e) {}
-  apply(saved);
-
-  if (toggle) {
-    toggle.addEventListener("click", function () {
-      var current = root.getAttribute("data-theme") ||
-        (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-      var next = current === "dark" ? "light" : "dark";
-      apply(next);
-      try { localStorage.setItem(KEY, next); } catch (e) {}
-    });
-  }
-
-  document.querySelectorAll(".copy-btn").forEach(function (btn) {
-    btn.addEventListener("click", function () {
-      var targetId = btn.getAttribute("data-copy-target");
-      var target = document.getElementById(targetId);
-      var codeEl = target ? target.querySelector("code") : null;
-      var text = codeEl ? codeEl.textContent : "";
-      if (!text) return;
-      var done = function () {
-        var original = btn.textContent;
-        btn.textContent = "Copied!";
-        btn.setAttribute("data-copied", "true");
-        setTimeout(function () {
-          btn.textContent = original;
-          btn.removeAttribute("data-copied");
-        }, 1600);
-      };
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(done, done);
-      } else {
-        var ta = document.createElement("textarea");
-        ta.value = text;
-        ta.style.position = "fixed";
-        ta.style.opacity = "0";
-        document.body.appendChild(ta);
-        ta.select();
-        try { document.execCommand("copy"); } catch (e) {}
-        document.body.removeChild(ta);
-        done();
-      }
-    });
-  });
-
-  // GitHub key verification — public, unauthenticated GitHub API calls
-  // made directly from the browser (github.com CORS-allows these).
-  var verifyForm = document.getElementById("verify-form");
-  var verifyResults = document.getElementById("verify-results");
-
-  function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, function (c) {
-      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c];
-    });
-  }
-
-  function formatDate(iso) {
-    if (!iso) return "unknown date";
-    var d = new Date(iso);
-    if (isNaN(d.getTime())) return "unknown date";
-    return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
-  }
-
-  function fetchKeys(url) {
-    return fetch(url, { headers: { "Accept": "application/vnd.github+json" } })
-      .then(function (r) {
-        if (r.status === 404) return { error: "not_found" };
-        if (r.status === 403) return { error: "rate_limited" };
-        if (!r.ok) return { error: "http_" + r.status };
-        return r.json().then(function (data) { return { data: data }; });
-      })
-      .catch(function () { return { error: "network" }; });
-  }
-
-  function errorMessage(err) {
-    switch (err) {
-      case "not_found": return "User not found.";
-      case "rate_limited": return "GitHub's public API rate limit was hit (60/hour, unauthenticated) — try again later.";
-      case "network": return "Network error — couldn't reach the GitHub API.";
-      default: return "Something went wrong (" + err + ").";
-    }
-  }
-
-  function renderSshCard(result) {
-    var html = '<div class="verify-card"><h3>SSH Signing Keys';
-    if (result.error) {
-      html += '<span class="verify-badge danger">error</span></h3><p class="verify-hint">' + errorMessage(result.error) + '</p></div>';
-      return html;
-    }
-    var keys = result.data || [];
-    html += '<span class="count-badge">' + keys.length + '</span></h3>';
-    if (!keys.length) {
-      html += '<p class="verify-hint">No SSH signing keys registered.</p>';
-    } else {
-      html += '<ul>' + keys.map(function (k) {
-        var alg = (k.key || "").split(" ")[0] || "ssh-key";
-        return '<li><code>' + escapeHtml(alg) + '</code> — ' + escapeHtml(k.title || "untitled") +
-          ' <span class="verify-badge ok">active</span>' +
-          '<div class="key-meta">added ' + formatDate(k.created_at) + '</div></li>';
-      }).join("") + '</ul>';
-    }
-    html += '</div>';
-    return html;
-  }
-
-  function renderGpgCard(result) {
-    var html = '<div class="verify-card"><h3>GPG Keys';
-    if (result.error) {
-      html += '<span class="verify-badge danger">error</span></h3><p class="verify-hint">' + errorMessage(result.error) + '</p></div>';
-      return html;
-    }
-    var keys = result.data || [];
-    html += '<span class="count-badge">' + keys.length + '</span></h3>';
-    var hasExpired = false;
-    if (!keys.length) {
-      html += '<p class="verify-hint">No GPG keys registered.</p>';
-    } else {
-      html += '<ul>' + keys.map(function (k) {
-        var expired = k.expires_at && new Date(k.expires_at) < new Date();
-        if (expired && !k.revoked) hasExpired = true;
-        var badge = k.revoked
-          ? '<span class="verify-badge danger">revoked</span>'
-          : (expired ? '<span class="verify-badge warn">expired</span>' : '<span class="verify-badge ok">active</span>');
-        return '<li><code>' + escapeHtml(k.key_id || "") + '</code> ' + badge +
-          '<div class="key-meta">added ' + formatDate(k.created_at) +
-          (k.expires_at ? ' · expires ' + formatDate(k.expires_at) : ' · no expiration') + '</div></li>';
-      }).join("") + '</ul>';
-      if (hasExpired) {
-        html += '<p class="verify-hint" style="margin-top:.6rem;">Don\'t delete expired keys — old commits signed with them still need the public key around to verify. Only remove one once you\'re sure nothing relies on it anymore.</p>';
-      }
-    }
-    html += '</div>';
-    return html;
-  }
-
-  if (verifyForm) {
-    verifyForm.addEventListener("submit", function (e) {
-      e.preventDefault();
-      var input = document.getElementById("verify-username");
-      var username = input ? input.value.trim().replace(/^@/, "") : "";
-      if (!username) return;
-      verifyResults.innerHTML = '<p class="verify-hint">Checking ' + escapeHtml(username) + '…</p>';
-      var base = "https://api.github.com/users/" + encodeURIComponent(username) + "/";
-      Promise.all([fetchKeys(base + "ssh_signing_keys"), fetchKeys(base + "gpg_keys")]).then(function (res) {
-        verifyResults.innerHTML = '<div class="verify-grid">' + renderSshCard(res[0]) + renderGpgCard(res[1]) + '</div>';
-      });
-    });
-  }
-
-  // Live GitHub star count on the header link — best-effort, fails silently
-  var starPill = document.getElementById("star-count");
-  var starNum = document.getElementById("star-count-num");
-  if (starPill && starNum) {
-    fetch("https://api.github.com/repos/hbenali/commit-signing-web", { cache: "no-store" })
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (data) {
-        var count = data && typeof data.stargazers_count === "number" ? data.stargazers_count : null;
-        if (!count) return;
-        starNum.textContent = count >= 1000 ? (count / 1000).toFixed(1) + "k" : String(count);
-        starPill.hidden = false;
-      })
-      .catch(function () {});
-  }
-
-  // Scroll-to-top button
-  var scrollTopBtn = document.getElementById("scroll-top-btn");
-  if (scrollTopBtn) {
-    var toggleScrollBtn = function () {
-      scrollTopBtn.classList.toggle("visible", window.scrollY > 400);
-    };
-    window.addEventListener("scroll", toggleScrollBtn, { passive: true });
-    toggleScrollBtn();
-    scrollTopBtn.addEventListener("click", function () {
-      var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
-    });
-  }
-})();
-
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/sw.js");
-}
-</script>
 </body>
 </html>

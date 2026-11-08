@@ -6,7 +6,7 @@ Interactive setup scripts for Git SSH commit signing, plus a doc site with manua
 
 - `scripts/git-ssh-signing-setup.sh` — Linux/macOS setup script
 - `scripts/git-ssh-signing-setup.bat` — Windows setup script
-- `index.html` — the doc site (single static file, no build step, no dependencies)
+- `index.html`, `site.css`, `app.js` — the doc site (static files, no build step, no dependencies; fonts self-hosted in `fonts/`)
 
 Both scripts: detect an existing GPG signing setup and offer to migrate, generate (or reuse) a key dedicated to signing only, detect the GitHub CLI and upload the key (recovering from a missing `admin:ssh_signing_key` token scope automatically), configure `commit.gpgsign`/`tag.gpgsign` separately, and finish with a real signed test commit to verify everything actually works.
 
