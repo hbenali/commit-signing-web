@@ -1,4 +1,4 @@
-const CACHE_NAME = 'commitsign-v3';
+const CACHE_NAME = 'commitsign-v4';
 const PRECACHE_URLS = [
   '/',
   '/index.html',
@@ -8,6 +8,7 @@ const PRECACHE_URLS = [
   '/icon-192.png',
   '/icon-512.png',
   '/site.css',
+  '/theme.js',
   '/app.js',
   '/404.js',
   '/fonts/big-shoulders-latin-wght.woff2',
