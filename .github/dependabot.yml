@@ -1,0 +1,15 @@
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    # Wait a few days after a release before proposing it; security updates ignore this.
+    cooldown:
+      default-days: 3
+    commit-message:
+      prefix: "ci"
+    # CodeQL init and analyze must stay on the same version: update them together.
+    groups:
+      codeql:
+        patterns: ["github/codeql-action/*"]

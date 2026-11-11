@@ -1,0 +1,6 @@
+name: CodeQL configuration
+
+# security-extended = the default security queries plus additional
+# lower-precision security queries (still no pure code-quality noise).
+queries:
+  - uses: security-extended
